@@ -145,6 +145,8 @@ function Move-MediaFiles ($sourceDir, $destDir, $hashCheck)
         }
         else
         {
+            $srcFile = $srcFile.Replace('[', '``[').Replace(']', '``]')
+            $fileNames[$fileName] = 0
             Write-Host 'Moving file from ' $srcFile ' to ' $destFile
             Move-Item "$srcFile" "$destFile"
         }
