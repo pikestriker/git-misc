@@ -1,0 +1,37 @@
+The distribution contains the following files:
+    TURING.EXE -   The Turing 6.55 System
+    CMDLINE.HLP -  The Command Line Help (Required by TURING.EXE)
+    EDITOR.HLP -   The Editor Help (Required by TURING.EXE)
+    TCOMP.EXE -    The Turing 2.55 Compiler
+    SCRNTEST.EXE - Screen Tester
+    MSHERC.COM  -  Utility for Graphics on Hercules Graphics Cards
+    CRC.COM -      Checksum Utility
+    PCX2TIM.EXE -  Graphics Utility for Creating TIM Files from PCX files
+    SCRNFILE.T -   Turing language module for displaying TIM files
+    EXAMPLES -     (DIRECTORY) Turing Example Programs
+    README. -      This File
+    RELEASE. -     The Release Notes for Turing 6.55.  Describes New
+		   Features and Programs.
+
+Running CRC.COM on the executable files on this disk
+should produce the results below.
+
+If the values you get differ from these, then in all probability, the
+executable being checked has become corrupted and should be replaced 
+from the original write-protected master.  You may also wish to check 
+for viruses on your system.
+
+Note:  These values are valid ONLY for Turing 6.55 and TComp 2.55
+-----------------------------------------------------------------------
+CRC-M2 - Cyclic Redundancy Checker, Version 1.13, 01/03/90, rtk
+
+B:\
+	TURING.EXE  : crc16=5205  crc32=AD759D4F
+	CMDLINE.HLP : crc16=9BD4  crc32=A8F67BA0
+	EDITOR.HLP  : crc16=564A  crc32=DBEAB5EC
+	TCOMP.EXE   : crc16=3391  crc32=FA1E5A8D
+	SCRNTEST.EXE: crc16=6D37  crc32=38EFA06D
+	MSHERC.COM  : crc16=0417  crc32=5FE13CAC
+	CRC.COM     : crc16=0AA3  crc32=EE7D0877
+	PCX2TIM.EXE : crc16=E7FC  crc32=F5C4C6C2
+	SCRNFILE.T  : crc16=62AE  crc32=2F2F8074

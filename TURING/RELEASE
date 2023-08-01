@@ -1,0 +1,955 @@
+		    PC Turing 6.55 Release Notes
+
+
+  Turing 6.55 is the Sept. 1993 release of the Turing System for the
+IBM PC and compatibles.  It contains both a new version of Turing
+and several new items that will be of interest to all Turing users.
+
+  To print the release notes out, load it into Turing and give the 
+":print" command.
+
+  This update adds a number of new features to Turing.  It includes new
+versions of TURING, TCOMP,  PCX2TIM and SCRNFILE.T and a number of new
+example programs.
+
+			New features
+
+- by clause for for loops (e.g.  for i : 1 .. 20 by 3)
+
+- case on strings         (e.g. case name of
+				     label horse, cow : ...)
+
+- New graphics commands: drawfillarc, drawfillbox, drawfillmapleleaf,
+			 drawfilloval, drawfillpolygon, drawfillstar,
+			 drawpolygon, drawmapleleaf, drawstar, whatrow,
+			 whatcol
+
+- access to the parallel and serial ports
+
+- Cursor now appears in graphics mode
+
+- Tighter error checking on graphics commands
+
+- Ability to break program on networks that disable Ctrl-Break
+
+- Ability to chain programs together.
+
+- New graphics mode names for setscreen
+
+- Easier redirection of output to printer
+
+- Input redirection with echo to screen
+
+- Output redirection to screen and file simultaneously
+
+  There are no known bugs in Turing 6.55.  If you think you have found a bug,
+or if you have any suggestions or comments, please contact Turing Technical 
+Support at (416) 978-8363.
+
+
+INDEX:
+    Contents
+    Installation
+    New Features
+    Control-C on some education networks
+    Using SCRNTEST
+    Hercules Graphics Cards in Turing
+    Using CRC
+    TCOMP, A Turing Compiler
+    PCX2TIM and SCRNFILE.T
+    HSA Example Programs
+    Turing Technical Support
+
+
+CONTENTS:
+
+	The Commercial Turing 6.55 distribution comes on 1 disk
+
+	Turing System 6.55
+		turing.exe      Turing 6.55
+		cmdline.hlp     Help file required by turing.exe
+		editor.hlp      Help file required by turing.exe
+		tcomp.exe       TComp 2.55, a Turing compiler
+		scrntest.exe    A program to test the graphics card and
+				monitor on a PC system.
+		msherc.com      A program to allow users with the Hercules
+				Graphics Cards to use graphics in Turing.
+		crc.com         A program to generate checksums to verify a
+				programs integrity.
+		pcx2tim.exe     A program to covert PCX files to TIM
+				(Turing IMage) format.
+		scrnfile.t      A Turing program to write the graphics
+				screen to a TIM file and to read a TIM file
+				and display it on the screen
+		readme.         A text file containing the checksum values
+				produced by crc.com for all the files on
+				this disk.
+		release.        This document
+
+
+INSTALLATION:
+
+  Turing 6.55 is compatible with all versions of DOS from 3.0 to 5.0.  It is
+compatible with all networks it has been tested on.  These include the Novell
+and Commodore networks.  The Turing environment is a single, independent
+program called turing.exe with 2 help files called cmline.hlp and editor.hlp.
+For a minimum installation, copy turing.exe and these two help files to the 
+appropriate directory in your DOS path (or onto a floppy disk for floppy based
+workstations).
+
+  In order for the students to be able to access the help screen in the
+editor or get the command-line help message.  The two help files (cmline.hlp 
+and editor.hlp) must be in teh same directory as turing.exe in order for 
+Turing to be able to find them.
+
+
+NEW FEATURES IN TURING 6.55:
+
+- by clause for for loops
+
+	The syntax for the for loop is now:
+
+		for [decreasing] [id ] : first .. last [by increment]
+		    statementsAndDeclarations
+		end for
+
+	This means that if the by clause is present, then the identifier (or
+	loop counter) is incremented (or decremented) by increment each time 
+	through the loop.
+
+	EXAMPLE:  Output 1, 3, 5, 7 and 9.
+
+		    for i : 1 .. 10 by 2
+			put i
+		    end for
+
+	EXAMPLE:  Output 10, 6, and 2.
+
+		    for decreasing j : 10 .. 1 by 4
+			put j
+		    end for
+
+	EXAMPLE:  Output 1.
+
+		    for j : 1 .. 10 by 20
+			put j
+		    end for
+
+- case on strings
+
+	The syntax for the case loop is still:
+
+		case expn of
+		    { label expn {, expn } :
+			statementsAndDeclarations }
+		    [ label :
+			statementsAndDeclarations ]
+		end case
+
+	except that expn can be a string as well an integer.
+
+	EXAMPLE:  Output a message based on value of name.
+
+		    case name of
+			label "horse", "cow" :  put "Farm animal"
+			label "tiger", "lion" : put "Jungle animal"
+			label "cat", "dog" :    put "Pet"
+			label :                 put "Unknown animal"
+		    end case
+
+- Access to serial and parallel ports
+
+	The serial and parallel ports can be accessed with four functions/
+	procedures.
+
+	    function serialin : integer
+	    procedure serialout (value : integer)
+
+	    function parallelin : integer
+	    procedure parallelout (value : integer)
+
+	serialin reads in a single character from the serial (COM1) port.
+	serialout sends a character out of the COM1 port.  It does all of
+	this at the speed at which the COM1 port is set (using the mode
+	command in DOS).  These routines will probably not be very efficient
+	beyond 1200 baud and may lose characters if characters are
+	continuously coming into the serial portat greater than 1200 baud.
+
+	parallelin reads the current value of the parallel (LPT1) port.
+	parallelout sets the value of the LPT1 port.  Note that if you want
+	to send a stream of characters to the parallel port (for example, if
+	it is connected to a printer), you can do this by opening the
+	file lpt1 in Turing using the open statement and putting to it.  The
+	parallelin and parallelout subprograms are meant to be used for robot
+	or other peripheral control.
+
+	In either serialout or parallelout, the value being sent to the
+	serial or parallel port is a single byte.  This means that value can
+	only have a value from 0 to 255.  Any attempt to send a value out of
+	this range will cause an error.
+
+	EXAMPLE:  Send a message to the COM1 port and then get a reply ending with a RETURN
+
+		% We assume that the serial port has been set up previously
+		% using the DOS mode command.
+		const message : string := "This is a test"
+		for i : 1 .. length (message)
+		    % Send the i-th character in the message
+		    serialout (message (i))  
+		end for
+		serialout (10)  % Send a linefeed at the end of the message
+		var inmessage : string := ""
+		loop
+		    % Read in a character from the port
+		    var ch : int := serialin
+		    % Exit when youve received a linefeed
+		    exit when ch = 10
+		    % Add the letter to the string
+		    inmessage := inmessage + chr (ch)
+		end loop
+
+	EXAMPLE:  Set the value of the parallel port to a value then print a 
+		  message when the value of the parallel port changes
+
+		% Read in the current value of the parallel port
+		const val : int := parallelin   
+		% Set the parallel port to the value 25
+		parallelout (25)
+		loop
+		    % Exit when the value read from the
+		    % parallel port has changed
+		    exit when val not= parallelin   
+		end loop
+		put "parallel port value has changed!"
+
+- New graphics procedures
+
+    drawfillarc (x, y, xRadius, yRadius : int,initialAngle, finalAngle,
+		 Color : int)
+
+	drawfillarc draws a pie-shaped piece of an oval and fills the
+	shape in.  The arc portion of the piece of pie is the same as would 
+	be drawn by drawarc with the same parameters, and the centre of the 
+	pie is (x, y).  The picture is filled in with colour Color.
+
+
+    drawfillbox (x1, y1, x2, y2, Color : int)
+
+	drawfillbox draws a box just as drawbox would, but it also fills the
+	shape in with colour Color.
+
+    drawmapleleaf (x1, y1, x2, y2, Color : int)
+    drawfillmapleleaf (x1, y1, x2, y2, Color : int)
+
+	drawmapleleaf draws a maple leaf that is bordered by the box (x1, y1)
+	and (x2, y2).  By changing the shape of the box, the mapleleaf can be
+	squashed, lengthened and even inverted (by making y1 larger than y2).
+	A standard maple leaf (as you would see on a Canadian flag) is
+	what you get when (x2 - x1) = (y2 - y1) (i.e. when you draw it into a
+	square, rather than a rectangle.  drawfillmapleleaf does the same 
+	thing as drawmapleleaf except it also fills the shape in.
+
+    drawstar (x1, y1, x2, y2, Color : int)
+    drawfillstar (x1, y1, x2, y2, Color : int)
+
+	drawstar draws a star that is bordered by the box (x1, y1) and
+	(x2, y2).  By changing the shape of the box, the star can be squashed,
+	lengthened and even inverted (by making y1 larger than y2).  A
+	standard star is what you get when (x2 - x1) = (y2 - y1) (i.e. when 
+	you draw it into a square, rather than a rectangle.  drawfillstar
+	does the same thing as drawstar except it also fills the shape in.
+
+    drawfilloval (x, y, xRadius yRadius, Color : int)
+
+	drawfilloval draws an oval just as drawoval would, but it also fills
+	the shape in with colour Color.
+
+    drawpolygon (x, y  : array 1 .. * of int, n : int, Color : int)
+    drawfillpolygon (x, y  : array 1 .. * of int, n : int, Color : int)
+ 
+	drawpolygon draws a polygon specified by the x and y arrays. n is the
+	number of points that should be drawn.  The figure drawn is a polygon,
+	so the figure is always closed.  i.e. Turing will draw a line from the
+	last point to the first point if necessary.  PC Turing has a limit of
+	256 on n.  drawfillpolygon does the same thing as drawpolygon except
+	it also fills the shape in.
+
+    whatrow
+    whatcol
+
+	These are two functions that return the current row and column of the
+	cursor (repectively).  They both return integers and can be used in 
+	screen or graphics mode.
+
+
+- Cursor in graphics mode
+
+	There is now a cursor in graphics mode.  This blinking cursor will 
+	appear whenever Turing is waiting for input.  (Unlike screen mode, 
+	the cursor does not appear at all times, only when waiting for input.)
+
+	Like the screen mode cursor, it can be made invisible with:
+			  setscreen (nocursor)
+	or the cursor appearance can be changed with:
+			  setscreen (cursor:5;7)
+
+- Better error checking in graphics mode
+
+    Turing now checks for certain error conditions such as:
+	Trying to use a colour in a graphics procedure greater than maxcolour
+	Giving drawpic an array that was not created using takepic
+	Trying to send graphics output going to a file
+
+	Each of these error conditions will now cause a run-time error 
+	instead of being ignored (and possibly causing erroneous output).
+
+- Ability to break programs on networks that disable Ctrl-Break/Ctrl-C
+
+	Certain networks (noteably AN/ICLAS and Commodore COMLINK) disable 
+	the Ctrl-Break and Ctrl-C key.  This has meant that students could 
+	not break out of infinite loops in Turing.  Now, on such networks, 
+	students can use Ctrl-B (as close to Ctrl-Break as we could get) to
+	break out of an infinite loop at any time.  Note that Ctrl-Break/
+	Ctrl-C is still disabled, you must use Ctrl-B in such a circumstance.
+
+- Minor output changes
+
+	There are a number of minor output changes that have been made.
+	    1)  When the user enters data from the keyboard, the RETURN key
+		will not cause the rest of the line to be erased as a normal 
+		RETURN would.
+	    2)  When a character is placed in the last column, the cursor 
+		will move down to the first column of the next line.  If 
+		however, the next character entered is a RETURN, the cursor 
+		will stay where it is.  If the character being placed is in
+		the last column and the last row, the cursor will stay where 
+		it is until another character is placed.
+
+	EXAMPLE:  Places an X in every position on the screen
+
+			for : 1 .. maxrow - 1
+			    % Note that the lines are adjacent
+			    put repeat ("X", maxcol)
+			end for
+			% Note the screen does not scroll
+			put repeat ("X", maxcol)..
+			delay (5000)
+			% Wait for 5 seconds
+
+- Chaining programs together
+
+	Using the system procedure, you have always had the ability to call 
+	DOS commands and executables.  However, the Turing program always 
+	remained resident and execution always returned to the Turing program.
+	This meant that there had to be sufficient memory available for
+	both the Turing program and the program being executed by the system 
+	procedure.
+
+	Now, you can have Turing start another program and throw itself away.
+	This means that Turing is no longer kept in memory when the program 
+	is being executed, and after the program is executed, you are returned
+	to DOS.
+
+	This is done by a simple modification of the system procedure.  To 
+	have Turing call another program while removing itself from memory, 
+	you must preface the command with chain:.
+
+			system (chain:myprog.exe)
+
+	Note that this command is dangerous.  Specifically, if you call it 
+	from Turing (as opposed to a program compiled with TComp) and you 
+	have not saved your source file, you will lose it!  Turing will be 
+	removed from memory without any warning when this command is executed.
+
+	Likewise, any open files will be closed instantly.  This means that 
+	there is a danger of lost data if all files were not closed proper 
+	before the system procedure was called.
+
+	This procedure is often used for start up menu programs, where a user
+	selects a program to run and doesnt want Turing to remain in memory. 
+	It can also be used with extraordinarly large Turing programs that 
+	can be split into different parts.  By compiling (using TComp) each
+	part separately, one can have each program call the other and never
+	have both in memory at once.
+
+- New graphics mode names for setscreen
+
+	There are a few new names for graphics modes that make use of 
+	different graphics mode a little more intuitive.
+
+			graphics:cga    corresponds to  graphics
+			graphics:ega    corresponds to  graphics:e16
+			graphics:vga    corresponds to  graphics:v16
+			graphics:mcga   corresponds to  graphics:m256
+
+	In other words, any time you were using: setscreen (graphics:m256), 
+	you can now use: setscreen (graphics:mcga).
+
+- Easier use of printer
+
+	To redirect output of a run to the printer, use the following
+	command in the Turing editor:
+
+			:r > printer
+
+	To have some output of a Turing program go to the printer, use the 
+	following method:
+					
+			open : stream, printer, put
+			put : stream, "This is getting sent to the printer"
+			put : stream, "This as well."
+			close : stream
+
+	As always, you can turn off the printing of a header using the 
+	-noheader option when starting up Turing.
+
+- Change in drawpic/takepic
+
+	Drawpic now checks to see that the array that it is drawing from was 
+	taken in the same graphics mode as the machine is now currently in.  
+	This means that an attempt to display a CGA image while im MCGA mode 
+	will cause a run-time error with the appropriate message, rather
+	than just displaying garbage.
+
+	This does mean that images created with PCX2TIM or takepic before 
+	Turing 6.5 cant be displayed with the current version of Turing.  
+	(You will get the message: 'Array passed to 'drawpic' is not a
+	takepic buffer.')
+
+	If the image can't be recreated (normally done by retaking the image 
+	or using the new version of PCX2TIM), call Technical Support for work
+	arounds.
+
+- New input/output redirection
+
+	A feature of Turing has been input and output redirection.  Using the
+	:r > file or :r < file commands in the editor (or -i infile or -o 
+	outfile options in TComp), you have been able to redirect input to 
+	come from a file rather than the keyboard and redirect output to go
+	to a file rather than the screen.  The disadvantage has been that 
+	when input came from a file, it wasnt echoed to the screen and 
+	likewise when output was sent to a file, it couldnt be seen on the
+	screen.  This made life a little more difficult, especially when 
+	typing input from a keyboard and sending output to a file.  For 
+	example, you could not see any of the prompts for input.
+
+	The new version of Turing solves this difficultly.  Now, you can have
+	input from a file be echoed to the screen by using the r << filename 
+	in the editor (or -ii filename option in TComp).  (You can still 
+	redirect input to come from a file without echo by using
+	r < filename.)  Likewise, you can have output sent to both file and 
+	screen simultaneously by using the r >> outfile in the editor 
+	(or -oo filename option in TComp).
+
+	You can also combine these two options, so that you can have input 
+	from a file echoed to both a screen and file.
+
+    To illustrate the new options, we show the output from a small program.
+
+    User input appears in underline.
+
+		Example Program
+		---------------
+		var word : string
+		put Enter a word: ..
+		get word
+		put The word is , word
+
+		Example Data File - indata
+		--------------------------
+
+		This is a test
+
+
+Run Command         Output on screen                outfile contains
+-----------         ----------------                ----------------
+  :r             Enter a word: This is a test
+			       ---- -- - ----
+		 The word is This
+
+  :r < indata    Enter a word: The word is This
+
+  :r << indata   Enter a word: This is a test
+		 The word is This
+
+  :r > outfile   This is a test                 Enter a word: The word is This
+		 ---- -- - ----
+
+  :r >> outfile  Enter a word: This is a test   Enter a word: This is a test
+			       ---- -- - ----
+		 The word is This               The word is This
+
+  :r << indata >> outfile
+		 Enter a word: This is a test   Enter a word: This is a test
+		 The word is This               The word is This
+
+
+    Note that whenever the r >> file command is used, whatever output you
+get on the screen will also appear in the file.  This does mean that you 
+can't use character or pixel graphics commands while running with this
+command because such graphics can't be sent to a file.
+
+To summarize:
+:r                      Input from keyboard.  Output to screen
+:r < infile             Input from infile.  Output to screen.  Input is not 
+			seen on screen
+:r << infile            Input from infile.  Output to screen.  Input is seen 
+			on screen
+:r > outfile            Input from keyboard.  Output to outfile.  Input is 
+			seen on screen but not in outfile
+:r < infile > outfile   Input from infile.  Output to outfile.  Input is not
+			seen on screen or in outfile.  Screen is blank.
+:r << infile > outfile  Input from infile.  Output to outfile.  Input is seen
+			in outfile.  Screen is blank.
+:r >> outfile           Input from keyboard.  Output to outfile.  Input is 
+			seen both on screen and in outfile
+:r < infile >> outfile  Input from infile.  Output to both screen and outfile.
+			Input is not seen on either screen or in outfile
+:r << infile >> outfile Input from infile.  Output to both screen and outfile.
+			Input is seen both on screen and in outfile
+
+
+CONTROL-C and EDUCATIONAL NETWORKS:
+
+  On two educational networks produced by IBM and Commodore, recent
+releases have disabled Control Break and Control C.  In both cases, this is 
+done by the operating system at boot up time.  Previously this meant that 
+students writing programs could not stop them using Control Break or 
+Control C.  The new version of Turing now allows users to break programs on 
+such networks using Ctrl-B.  Ctrl-Break and Ctrl-C still does not work as 
+they do not produce any key codes when pressed under these networks.
+
+
+USING SCRNTEST:
+
+  SCRNTEST.EXE is a small utility program to check your graphics card and 
+monitor.  It can identify the graphics card and test it.  It also checks some
+of the graphics abilities that Turing uses.  Thus, if there are any problems
+using Turing in a particular machine configuration, you can use SCRNTEST to 
+isolate the problem.
+
+  To run SCRNTEST, type scrntest.  There are two possible options:  -snow and
+-bw.  Use scrntest -snow on monitors where you are getting screen flicker.  
+Use "scrntest -bw" on systems with colour graphics cards and black & white
+monitors.
+
+  SCRNTEST begins by identifying the graphics card and monitor type and the 
+current graphics mode.  The next step is to change the video mode, if 
+necessary and clear the screen.  Once this is has been done, you go to the 
+main menu.
+
+  This menu allows you to test the screen colours, test turning the cursor 
+off and on and then all the various graphics modes.  All of Turing's graphics
+modes are displayed, although those marked with a "*" are probably not 
+available on the current machine.  They are included just in case you
+believe that Turing has misidentified the graphics card and you wish to see 
+if you can switch to that graphics mode.
+
+  The colour test displays all combinations of foreground and background 
+colours available.  It also tests out the blinking attribute on colour 
+systems.
+
+  The cursor test display changes the shape of the cursor and then makes it 
+invisible.
+
+  When you test a graphics mode, SCRNTEST tries to switch to the screen to 
+that particular mode.  If it succeeds, it displays maxx, maxy, maxrow, 
+maxcol and maxcolour for that mode.  It also displays an elongated box 
+containing each of the possible colours for that graphics mode.  It then 
+draws a grid at the bottom of the screen, which gives a good idea of the 
+fineness of lines in the graphics mode.
+
+
+HERCULES GRAPHICS CARD USERS:
+
+  If you wish to use pixel graphics in Turing and are using a Hercules 
+graphics card (or compatible), you will need to to run a small program called
+MSHERC.COM  found on the Turing System 6.55 disk.  This program should be run
+sometime before you run Turing.  The program will install itself in memory 
+and remain active until the machine is re-booted.  We suggest that you 
+install it on your hard disk and call it in your autoexec.bat.   That way, 
+you will have access to Hercules graphics in Turing without having to make 
+sure you have already run the program.
+
+  After this program has been run, you can get Hercules graphics mode in 
+Turing (720 x 348 monochrome with a 25 x 80 screen).  To switch to Hercules
+graphics mode in Turing, execute the following statement in your program:
+		setscreen ("graphics")
+  If you are unsure whether you have a Hercules compatible graphics card, try
+running the MSHERC.COM program from DOS.  If you do not have such a graphics 
+card, the program will reply with a message to that effect.  If it does
+not give a message, or if it gives a message indicating successful 
+installation of the program, try starting Turing and entering the following 
+program:
+		setscreen ("graphics")
+		put "maxx is ", maxx
+
+	The program should output:     maxx is 719
+
+
+USING CRC:
+
+  CRC.COM is a small free software utility written by Raymond T. Kaya.  It 
+reads a file and performs a calculation on the bytes it reads in.  It then 
+produces two numbers.  These two numbers are checksums.  A given file has a 
+particular checksum.  If the file is altered in any way, it is a virtual 
+certainty that the checksum value for the file will be different.
+
+  CRC.COM can be used to verify that a file is intact.  By recording the 
+checksum values for a file when it is "just out of the box", you can run 
+CRC.COM much later on the same files.  If the checksum has changed, then the 
+file has been modified in some way  If the file is an executable, it is
+probably corrupt and should be recopied from the original disks.
+
+  The README. file on the Turing System 6.55 disk contains the checksum 
+values for the Turing executables.  If Turing (or any of its components) has 
+trouble running, run CRC on them and compare the values.  If they have 
+changed, the file has become corrupted and should be recopied from the 
+original.
+
+  You run CRC using the command crc file.exe where file.exe is the file that 
+you want the checksums for.  You can use wild cards in the designation as 
+well.  Thus the command crc *.* will produce checksums for every file in the
+directory in which the command is executed.
+
+
+TCOMP, A TURING COMPILER:
+
+  TCOMP is a program that allows you and your students to produce executables
+from Turing programs.  These executables can be taken home or used in 
+whatever fashion one wishes.
+
+  Using TCOMP couldn't be simpler.  The command to compile a Turing program 
+called myprog.t is tcomp myprog.t.  It gives a message as it goes through the
+stages of compilation, and a few seconds later, myprog.exe appears on the
+disk.  To run it, you just type myprog.
+
+  Besides producing executables, there are some other advantages to TCOMP.
+Because the compiler and executor portions of Turing are not in memory at the
+same time, you can compile and execute programs that are larger than would be
+acceptable under Turing.  A program that is compiled has 110K more free 
+memory.  This means that large programs being run under low memory conditions
+(such as a large network overhead and many TSR's, or on 512K PCs) will find 
+many of the memory restrictions relaxed.
+
+  It should be noted that TCOMP is a binding together of the executor portion
+of Turing along with the pseudo-code produced by the executable.  
+Consequently, it does not run programs any faster than in the Turing 
+environment.
+
+  There are a number of options available in TCOMP, most of which are of 
+little concern to the majority of users.  To get a complete list of options, 
+just type TCOMP with no filename.
+
+    -info (i.e. tcomp  -info myprog.t) will produce information telling you 
+	    about the size of the programs code table, manifest table, 
+	    memory needed for global variables, etc.
+
+    -nobreak will cause the executable program produced to ignore 
+	    Ctrl-C/Ctrl-Break from the keyboard.  This means that the
+	    executable program can not be interrupted except by hitting 
+	    Ctrl-Alt-Del or by turning off the computer.
+
+	    This option is often used by programs which do a lot of heavy 
+	    disk access.  It minimizes the possibility of the user breaking 
+	    out of the program without properly closing all files, etc.
+
+    -sysinclude=<dir> uses <dir> as the directory to find all include files
+	    that start with %.  (i.e. if the command is
+	    tcomp -sysinclude=c:\includes, then when the compiler reaches 
+	    the statement include "%header" in the Turing program, it looks
+	    for the file header in the directory c:\includes.  By default, 
+	    the system include directory is the directory that Turing resides
+	    in.)
+
+    -noformfeed.  Normally, a Turing program uses the printer directly (i.e. 
+	    by opening the file "PRN" or "PRINTER" for put and then 'put'ing 
+	    to the file).  When that file is closed (i.e. close : stream), 
+	    Turing does a form feed on the printer.  The -noformfeed option 
+	    turns off the printing of that form feed.
+
+    -noheader.  When a Turing program outputs to the printer, it normally 
+	    puts a header at the top of the output with the program name and 
+	    the date.  The -noheader option turns that off.
+
+    -nomessage.  Normally, when the executable terminates, there is a 
+	    message [Press any key to return to DOS].  The user presses a 
+	    key and the screen is cleared.  The -nomessage option eliminates 
+	    the message.  When the program terminates, the user is instantly 
+	    returned to DOS.
+
+    -anychar.  Normally Turing allows only printables (i.e. non-graphics 
+	    characters) in files and in line-oriented input (i.e. using the 
+	    get statement.  While this kept files and input clean of 
+	    invisible non-printables that would cause errors, it also
+	    meant that one could not enter any non-ascii characters such as 
+	    accented characters.  When this option is set, Turing no longer 
+	    checks for bad characters.  Instead any character may occur in a 
+	    file or be entered in line-oriented input.
+
+    -stack=<num>.  This option sets the default stack size in Turing to be 
+	    <num> kilobytes.  By default, this value is 64.  The stack holds
+	    all temporary and local variables in Turing (i.e. all variables
+	    declared in procedures or loops).
+
+    -printermargin=<num>.  This option sets the size of the printer margin on
+	    the output from the Turing program.  By default, the margin is 
+	    zero.  If you find your executables are printing off the left 
+	    side of the printer, use this option to have all output 
+	    automatically space in by <num> spaces.
+
+    -sysdata=<dir> uses <dir> as the directory to find system data files 
+	    (those passed to the program as "%file").  For example, the 
+	    command to compile is tcomp -sysdata=c:\sysfile myprog,t.
+	    The program is run with the command myprog  %sample.  The
+	    statement put : 1, "hello" writes "hello" to  c:\sysfile\sample.
+
+    Note that all but -info, -nobreak and -sysinclude can be set at run
+    time, by using these options when running the program.  There are a
+    few other options that are available at execution time.  For example,
+    if you compiled myprog.t into myprog.exe, you could run it using
+    myprog -nomessage to avoid getting the message at the end.
+
+    -i  infile (i.e. myprog -i infile) causes all input to be read from
+	    the file infile.  This is roughly equivalent to ":r < infile" in
+	    the Turing environment.
+
+    -ii  infile (i.e. myprog -ii infile) causes all input to be read from
+	    the file infile and echoed to the screen.  This is roughly
+	    equivalent to ":r << infile" in the Turing environment.
+
+    -o outfile causes all output that would normally go to the screen to be
+	    written to the file outfile.  This is roughly equivalent to
+	    ":r > outfile" in the Turing environment.
+
+    -oo outfile causes all output that would normally go to the screen to be
+	    written to the file outfile and sent to the screen.  This is
+	    roughly equivalent to ":r >> outfile" in the Turing environment.
+
+    -snow, -snowcontrol causes snow control to be turned on.  Use this option
+	    when executing your program if there is a problem with screen
+	    flicker.
+
+    -nosnow, -nosnowcontrol causes snow control to be turned off.  For faster
+	    output, use this option when executing your program on a CGA 
+	    system with no screen flicker.
+
+    -bw causes all output to be in black and white.  On systems with colour 
+	    graphics cards and black and white monitors this produces the 
+	    proper mapping of colour output to black and white.
+
+    Once again, to set a compile-time option, use tcomp -option myprog.t.  To
+    set a executable option, run the program using myprog -option.  In both 
+    cases, -option should be replaced by the option actually used.
+
+
+PCX2TIM AND SCRNFILE.T:
+
+  In the Turing 6.55 release, we have supplied two programs to make it easy 
+for users to read PCX format pictures and display them in Turing.  
+PCX2TIM.EXE is a program that takes PCX format files and converts them to a 
+format that we call TIM files (short for Turing IMage format).  These TIM
+files can be read and displayed using the module ScreenFile that is found in 
+the file SCRNFILE.T.
+
+  PCX format is the one used by PC-Paintbrush (a well known "paint" program).
+We decided to allow the interchange from PCX instead of one of the many other
+graphical standards since PCX has been around for a long time, is supported 
+by most draw and paint programs, and is available as a conversion format from
+many public domain and shareware format-conversion programs.
+
+  SCRNFILE.T also has routines to save screen images in TIM format, 
+automatically handling the difficulty that some users have encountered when 
+saving VGA screen images.  (More specifically, ScreenFile saves the screen 
+in chunks, thus avoiding the 64K limits in global space in Turing (a full 
+VGA screen takes 150K!)).
+
+  PCX2TIM.EXE is an executable.  It takes one or two arguments.  The general 
+form is pcx2tim file.pcx.  file.pcx should be an image in PCX format.  
+PCX2TIM will then display the file and write a TIM file containing the same 
+image.  When the user hits a key, it returns to DOS.
+
+  Each PCX file is meant to be displayed in a specific graphics mode.  
+Usually, it is quite possible for PCX2TIM to determine which graphics mode 
+it was meant to be displayed in, by using looking at the resolution.  
+However, this is not always the case.  If you run PCX2TIM on a PCX file and
+get an incomprehensible image, check to see which graphics mode the image was
+recorded in.
+
+  Next, add the video mode to the PCX2TIM command.  The following chart can 
+be used to determine the video mode.  (You get the same chart by typing 
+pcx2tim and pressing ENTER.)
+
+       MODE      RESOLUTION                             TURING MODE
+	4       320 x 200   4-colour CGA                graphics
+	5       320 x 200   4-colour CGA (grey scale)   graphics:mono
+	6       640 x 200   2-colour CGA                graphics:hmono
+	13      320 x 200   16-colour EGA/VGA           graphics:16
+	14      640 x 200   16-colour EGA/VGA           graphics:h16
+	15      640 x 350   2-colour EGA/VGA
+	16      640 x 350   16-colour EGA/VGA           graphics:ega
+	17      640 x 480   2-colour VGA                graphics:v2
+	18      640 x 480   16-colour VGA               graphics:vga
+	19      320 x 200   256-colour MCGA/VGA         graphics:mcga
+
+  When you select the correct graphics mode, (for example pcx2tim file.pcx 18)
+the image should appear as it did originally.  If you are not certain about 
+the graphics mode, try each in turn.  Record which graphics mode worked!
+
+  One limitation of PCX2TIM is that PCX files can contain a palette.  In 
+other words, they can change the natural mapping of the screen colours (or 
+colour table).  Unfortunately, Turing does not have a method of changing the 
+colour table at this time.  This means that if you are taking an image that
+has changed the basic colours and trying to display the image in Turing, the 
+image will be intact, but the colours will appear incorrect.
+
+  We have provided an example of this with the file MCGA.PCX in the directory
+HSA.  The colour map is entirely changed, but the basic image is still
+visible.
+
+  What this means is that users producing their own artwork in PC-PaintBrush 
+or another paint program should not change the default palette.  Now that you
+have a TIM file, you can use the ScreenFile module to display it.  However, 
+there are some points to be careful about:
+
+  SCRNFILE.T is a Turing module that reads and writes TIM files.  You can
+examine this program and incorporate it into your own programs.  However, it 
+is simpler to include SCRNFILE.T into your program and use it wholesale.
+
+  While still in the pcx directory, start Turing and load cga.t.  This
+program is an example of using the ScreenFile module to display a TIM file.  
+(We presume that you already used PCX2TIM.EXE to produce the TIM files.)  Now
+try running mcga.t.  This is a graphic example of the problem with changing
+colour tables.   The frog is still visible, but the colours have changed 
+dramatically.
+
+  It is important to note that you must set the graphics mode before you call
+any procedure in ScreenFile.  As well, you should change to the appropriate 
+graphics mode before you include SCRNFILE.T.  For TIM files that you have
+created yourself, make sure the screen is in the same graphics mode that it
+was in when you saved the file.  For PCX files, you must select the mode 
+appropriate to the resolution.  The chart on the above has the Turing
+setscreen equivalents for the various resolutions.
+
+  Remember that SCRNFILE.T must be in the same directory as the user's
+program in order for Turing to find the file.  The other option is to place 
+it in the same directory as turing.exe and use include "%scrnfile.t".
+
+ScreenFile Module - Function Summary
+    The following functions are available for use in the module ScreenFile:
+
+    ScreenFile.screenToFile (x1, y1, x2, y2 : int, filename : string, 
+			     var ok : boolean)
+
+	This procedure strongly resembles takepic.  However, instead of 
+	saving the area of the screen to an array, it saves it to a file in 
+	the TIM format.  It's advised, although not necessary, that the 
+	filename end in .TIM.  The boolean variable ok returns with true 
+	if the file was successfully opened and written to.  Otherwise it 
+	returns false and one should assume that the TIM file was not 
+	written.  (Check for being out of disk space as screen images 
+	are large!)
+
+    ScreenFile.fileToScreen (x1, y1 : int, filename : string,
+			     var ok : boolean)
+
+	This routine is the equivalent of drawpic, except that it draws from 
+	a file instead of an array.  It will display the TIM file, with the 
+	lower left corner of the picture being x1, y1.  For full screen 
+	pictures, x1 and y1 will be 0.  Once again, ok returns true if the
+	file was successfully opened and read.  This is the routine that 
+	you use to display a TIM file created by PCX2TIM.
+
+    ScreenFile.showFiles (description : string)
+
+	This is a small routine to display a directory listing of files 
+	on the screen.  descriptor can be a wild card in order to display
+	only certain files.  (e.g. ScreenFile.showFiles ("*.TIM") displays 
+	all the TIM files in the directory.)
+
+    ScreenFile.pause
+
+	This routine waits until the user has entered a keystroke.
+
+
+ScreenFile Module - Example Programs
+
+  Here is a small example program that saves a VGA image as a TIM file:
+
+	% First, set the graphics mode appropriately
+	setscreen ("graphics:v16")
+
+	% include the source of the ScreenFile module
+	% (must be in the same directory as turing.exe)
+	include "%scrnfile.t"
+
+	% Draw a very boring picture  (an oval with an X through it)
+	drawoval (100, 100, 80, 80, maxcolour)
+	drawline (20, 20, 180, 180, maxcolour - 1)
+	drawline (20, 180, 180, 20, maxcolour - 2)
+
+	% now, use the ScreenFile.screenToFile routine to save the image
+	% to the file mypict.tim.  If it fails, ok will return false.
+	var ok : boolean
+	ScreenFile.screenToFile (80, 80, 120, 120, "mypict.tim", ok)
+	if not ok then
+	    put "Image not saved"
+	end if
+
+    Having created mypict.tim, here's a program to display it.
+
+	% First, set the graphics mode appropriately
+	setscreen ("graphics:vga")
+
+	% include the source of the ScreenFile module
+	% (must be in the same directory as turing.exe)
+	include "%scrnfile.t"
+
+	% now, use the ScreenFile.screenToFile routine to read the image
+	% from the file mypict.tim.  If it fails, ok will return false.
+	var ok : boolean
+	ScreenFile.fileToScreen (20, 20, "mypict.tim", ok)
+	if ok then
+	    ScreenFile.pause
+	else
+	    put "Image not displayed"
+	end if
+
+
+  Together, these programs should give you a good idea of how to use the
+ScreenFile module.
+
+Summary:
+
+    1) If you get an odd picture from PCX2TIM, try different graphics modes
+
+    2) The colour table isn't modified in Turing.  Certain images will have 
+       their colours altered.
+
+    3) SCRNFILE.T must reside in the same directory as the user's program.
+
+    4) You must set the correct graphics mode for the image before the
+       includes or calls procedures in ScreenFile.
+
+
+HSA EXAMPLE PROGRAMS:
+
+  There are a variety of sample programs provided in the HSA directory.  
+These examples have been created and collected by the staff at HSA.  Some
+of these illustrate concepts such a having music and graphics play at the
+same time.  Others are just games or entertainment written by the staff
+while testing versions of Turing.
+
+  Please feel free to run, examine and modify or change any of these programs.
+
+
+TURING TECHNICAL SUPPORT:
+
+	If you encounter any problems with Turing, or if you have any
+	suggestions as to improvements, features you'd like to see or
+	if you have questions about certain features, please contact 
+	Turing Technical Support.
+
+			Turing Technical Support
+			     (416) 978-8363
+			Mon-Fri  10:00 - 6:00 EST
