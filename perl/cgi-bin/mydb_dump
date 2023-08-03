@@ -1,0 +1,765 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = off;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET escape_string_warning = off;
+
+--
+-- Name: mydb; Type: DATABASE; Schema: -; Owner: richard
+--
+
+CREATE DATABASE mydb WITH TEMPLATE = template0 ENCODING = 'UTF8' LC_COLLATE = 'en_CA.UTF-8' LC_CTYPE = 'en_CA.UTF-8';
+
+
+ALTER DATABASE mydb OWNER TO richard;
+
+\connect mydb
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = off;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET escape_string_warning = off;
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: accounts; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE accounts (
+    acct_id integer NOT NULL,
+    acct_desc character varying(50) NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.accounts OWNER TO "www-data";
+
+--
+-- Name: buckets; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE buckets (
+    acct_id integer NOT NULL,
+    seq integer NOT NULL,
+    balance numeric(12,2) DEFAULT 0.00 NOT NULL,
+    refresh_amt numeric(12,2) DEFAULT 0.00 NOT NULL,
+    fix_var character varying(8) DEFAULT 'VARIABLE'::character varying NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL,
+    buck_desc character varying(50) NOT NULL,
+    refresh_freq character varying(2) DEFAULT 'WE'::character varying NOT NULL,
+    last_process_dt date,
+    auto_process_ind character(1) DEFAULT 'N'::bpchar NOT NULL
+);
+
+
+ALTER TABLE public.buckets OWNER TO "www-data";
+
+--
+-- Name: frequency; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE frequency (
+    freq_cd character varying(2) NOT NULL,
+    freq_desc character varying(50) NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.frequency OWNER TO "www-data";
+
+--
+-- Name: group_scripts; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE group_scripts (
+    group_cd character varying(8) NOT NULL,
+    script_name character varying(30) NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.group_scripts OWNER TO "www-data";
+
+--
+-- Name: income_expense; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE income_expense (
+    acct_id integer NOT NULL,
+    seq integer NOT NULL,
+    fixed_amt numeric(12,2) DEFAULT 0.00 NOT NULL,
+    freq character varying(2) DEFAULT 'WE'::character varying NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL,
+    inc_exp character varying(1) DEFAULT 'E'::character varying NOT NULL,
+    value_type character varying(1) DEFAULT 'F'::character varying NOT NULL,
+    range_low_amt numeric(12,2) DEFAULT 0.00 NOT NULL,
+    range_high_amt numeric(12,2) DEFAULT 0.00 NOT NULL,
+    trans_type character varying(2) NOT NULL,
+    incexp_desc character varying(50) NOT NULL,
+    auto_process_ind character(1) DEFAULT 'N'::bpchar NOT NULL,
+    out_ms_seq integer DEFAULT 0 NOT NULL,
+    in_ms_seq integer DEFAULT 0 NOT NULL,
+    last_process_dt date
+);
+
+
+ALTER TABLE public.income_expense OWNER TO "www-data";
+
+--
+-- Name: list_of_values; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE list_of_values (
+    lov_cd character varying(8) NOT NULL,
+    lov_cat_cd character varying(8) NOT NULL,
+    lov_desc character varying(50) NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.list_of_values OWNER TO "www-data";
+
+--
+-- Name: lov_category; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE lov_category (
+    lov_cat_cd character varying(8) NOT NULL,
+    cat_desc character varying(50) NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.lov_category OWNER TO "www-data";
+
+--
+-- Name: money_source; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE money_source (
+    acct_id integer NOT NULL,
+    seq integer NOT NULL,
+    source_txt character varying(50) NOT NULL,
+    source_type character varying(8) DEFAULT ''::character varying NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1,
+    upd_ts timestamp without time zone DEFAULT now(),
+    balance numeric(10,2) DEFAULT 0.00 NOT NULL
+);
+
+
+ALTER TABLE public.money_source OWNER TO "www-data";
+
+--
+-- Name: redirect; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE redirect (
+    rd_name character varying(20) NOT NULL,
+    rd_page character varying(500) NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.redirect OWNER TO "www-data";
+
+--
+-- Name: transaction_type; Type: TABLE; Schema: public; Owner: richard; Tablespace: 
+--
+
+CREATE TABLE transaction_type (
+    typeid character varying(2) NOT NULL,
+    type_desc character varying(50) NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL,
+    acct_id integer NOT NULL,
+    trans_type character varying(8),
+    buck_seq integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.transaction_type OWNER TO richard;
+
+--
+-- Name: transactions; Type: TABLE; Schema: public; Owner: richard; Tablespace: 
+--
+
+CREATE TABLE transactions (
+    acct_id integer NOT NULL,
+    trans_date date NOT NULL,
+    seq integer NOT NULL,
+    amt numeric(12,2) NOT NULL,
+    inc_exp_seq integer NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL,
+    trans_type character varying(2) DEFAULT ''::character varying NOT NULL,
+    trans_txt character varying(50),
+    ms_seq integer NOT NULL,
+    in_out character varying(8) NOT NULL
+);
+
+
+ALTER TABLE public.transactions OWNER TO richard;
+
+--
+-- Name: user_accounts; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE user_accounts (
+    userid integer NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL,
+    access character varying(8) DEFAULT 'OWNER'::character varying NOT NULL,
+    acct_id integer NOT NULL
+);
+
+
+ALTER TABLE public.user_accounts OWNER TO "www-data";
+
+--
+-- Name: user_accounts_acct_id_seq; Type: SEQUENCE; Schema: public; Owner: www-data
+--
+
+CREATE SEQUENCE user_accounts_acct_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.user_accounts_acct_id_seq OWNER TO "www-data";
+
+--
+-- Name: user_accounts_acct_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: www-data
+--
+
+ALTER SEQUENCE user_accounts_acct_id_seq OWNED BY user_accounts.acct_id;
+
+
+--
+-- Name: user_accounts_acct_id_seq; Type: SEQUENCE SET; Schema: public; Owner: www-data
+--
+
+SELECT pg_catalog.setval('user_accounts_acct_id_seq', 9, true);
+
+
+--
+-- Name: user_groups; Type: TABLE; Schema: public; Owner: www-data; Tablespace: 
+--
+
+CREATE TABLE user_groups (
+    userid integer NOT NULL,
+    group_cd character varying(8) NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.user_groups OWNER TO "www-data";
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: richard; Tablespace: 
+--
+
+CREATE TABLE users (
+    userid integer NOT NULL,
+    user_first_nm character varying(30),
+    user_sur_nm character varying(30),
+    user_nickname character varying(15) NOT NULL,
+    user_email character varying(30) NOT NULL,
+    crtn_id integer DEFAULT 1 NOT NULL,
+    crtn_ts timestamp without time zone DEFAULT now() NOT NULL,
+    upd_id integer DEFAULT 1 NOT NULL,
+    upd_ts timestamp without time zone DEFAULT now() NOT NULL,
+    password character varying(50) NOT NULL,
+    last_acct_id integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO richard;
+
+--
+-- Name: users_userid_seq; Type: SEQUENCE; Schema: public; Owner: richard
+--
+
+CREATE SEQUENCE users_userid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_userid_seq OWNER TO richard;
+
+--
+-- Name: users_userid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: richard
+--
+
+ALTER SEQUENCE users_userid_seq OWNED BY users.userid;
+
+
+--
+-- Name: users_userid_seq; Type: SEQUENCE SET; Schema: public; Owner: richard
+--
+
+SELECT pg_catalog.setval('users_userid_seq', 2, true);
+
+
+--
+-- Name: acct_id; Type: DEFAULT; Schema: public; Owner: www-data
+--
+
+ALTER TABLE user_accounts ALTER COLUMN acct_id SET DEFAULT nextval('user_accounts_acct_id_seq'::regclass);
+
+
+--
+-- Name: userid; Type: DEFAULT; Schema: public; Owner: richard
+--
+
+ALTER TABLE users ALTER COLUMN userid SET DEFAULT nextval('users_userid_seq'::regclass);
+
+
+--
+-- Data for Name: accounts; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY accounts (acct_id, acct_desc, crtn_id, crtn_ts, upd_id, upd_ts) FROM stdin;
+1	Joint Account	1	2010-08-11 21:00:15.779131	1	2010-08-11 21:00:15.779131
+2	personal	1	2010-11-01 17:25:01.495093	1	2010-11-01 17:25:01.495093
+\.
+
+
+--
+-- Data for Name: buckets; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY buckets (acct_id, seq, balance, refresh_amt, fix_var, crtn_id, crtn_ts, upd_id, upd_ts, buck_desc, refresh_freq, last_process_dt, auto_process_ind) FROM stdin;
+1	4	25.00	25.00	VARIABLE	1	2011-04-06 17:20:01.896504	1	2011-04-06 17:20:01.896504	Clothing and Gifts	WE	\N	N
+1	2	-51.50	75.00	VARIABLE	1	2011-04-06 17:18:06.686202	1	2011-04-20 17:25:38.324231	Transportation	WE	\N	N
+1	5	1.50	25.00	VARIABLE	1	2011-04-06 17:20:20.438497	1	2011-04-20 17:32:49.836006	Entertainment	WE	\N	N
+1	3	30.00	190.00	VARIABLE	1	2011-04-06 17:19:20.131699	1	2011-05-03 17:48:29.299059	Groceries	WE	\N	N
+1	6	8.00	25.00	VARIABLE	1	2011-04-06 17:20:38.26689	1	2011-05-03 17:48:29.299059	Other	WE	\N	N
+1	1	5800.00	1000.00	FIXED	1	2011-03-15 16:20:03.130143	1	2012-02-21 17:11:42.76401	Fixed	WE	2012-02-18	Y
+\.
+
+
+--
+-- Data for Name: frequency; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY frequency (freq_cd, freq_desc, crtn_id, crtn_ts, upd_id, upd_ts) FROM stdin;
+WE	Weekly	1	2010-07-01 21:53:57.587181	1	2010-07-01 21:53:57.587181
+BW	Bi-Weekly	1	2010-07-01 21:54:20.139159	1	2010-07-01 21:54:20.139159
+BM	Bi-Monthly	1	2010-07-01 21:54:41.91918	1	2010-07-01 21:54:41.91918
+\.
+
+
+--
+-- Data for Name: group_scripts; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY group_scripts (group_cd, script_name, crtn_id, crtn_ts, upd_id, upd_ts) FROM stdin;
+ADMIN	incomeexpenses.pl	1	2010-07-22 21:55:27.630868	1	2010-07-22 21:55:27.630868
+ADMIN	listofvalues.pl	1	2010-07-22 21:55:35.597206	1	2010-07-22 21:55:35.597206
+ADMIN	lovcategory.pl	1	2010-07-22 21:55:58.449959	1	2010-07-22 21:55:58.449959
+ADMIN	transactiontypes.pl	1	2010-07-22 21:56:16.337394	1	2010-07-22 21:56:16.337394
+ADMIN	home.pl	1	2010-09-08 17:11:39.911155	1	2010-09-08 17:11:39.911155
+ADMIN	processrequests.pl	1	2010-09-08 17:43:48.677151	1	2010-09-08 17:43:48.677151
+ADMIN	groupscripts.pl	1	2010-11-27 22:53:50.444083	1	2010-11-27 22:53:50.444083
+ADMIN	transactions.pl	1	2010-07-21 17:18:08.560196	1	2010-11-28 11:35:16.562268
+ADMIN	usergroups.pl	1	2010-11-28 20:50:16.632551	1	2010-11-28 20:50:16.632551
+MEMBER	processrequests.pl	1	2010-11-30 17:21:55.670135	1	2010-11-30 17:21:55.670135
+MEMBER	transactiontypes.pl	1	2010-11-30 17:22:19.784178	1	2010-11-30 17:22:19.784178
+MEMBER	home.pl	1	2010-11-30 17:22:55.191789	1	2010-11-30 17:22:55.191789
+MEMBER	transactions.pl	1	2010-11-30 17:23:24.220106	1	2010-11-30 17:23:24.220106
+MEMBER	incomeexpenses.pl	1	2010-11-30 17:23:42.678807	1	2010-11-30 17:23:42.678807
+ADMIN	addusertoaccount.pl	1	2010-12-02 17:34:11.84219	1	2010-12-02 17:34:11.84219
+MEMBER	addusertoaccount.pl	1	2010-12-02 17:34:51.783392	1	2010-12-02 17:34:51.783392
+ADMIN	moneysource.pl	1	2010-12-08 17:26:21.727787	1	2010-12-08 17:26:21.727787
+MEMBER	moneysource.pl	1	2010-12-08 17:26:35.003956	1	2010-12-08 17:26:35.003956
+ADMIN	buckets.pl	1	2011-03-28 17:09:25.236463	1	2011-03-28 17:09:25.236463
+MEMBER	buckets.pl	1	2011-03-28 17:09:35.92328	1	2011-03-28 17:09:35.92328
+ADMIN	transfer.pl	1	2011-06-16 17:09:07.295692	1	2011-06-16 17:09:07.295692
+MEMBER	transfer.pl	1	2011-06-16 17:09:19.90975	1	2011-06-16 17:09:19.90975
+\.
+
+
+--
+-- Data for Name: income_expense; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY income_expense (acct_id, seq, fixed_amt, freq, crtn_id, crtn_ts, upd_id, upd_ts, inc_exp, value_type, range_low_amt, range_high_amt, trans_type, incexp_desc, auto_process_ind, out_ms_seq, in_ms_seq, last_process_dt) FROM stdin;
+1	2	0.00	MO	1	2010-07-10 23:32:05.574696	1	2010-10-07 17:34:01.135498	E	R	120.00	190.00	BL	EPCOR	N	0	0	\N
+1	3	0.00	MO	1	2010-10-08 09:38:06.927097	1	2010-10-08 09:38:06.927097	E	R	50.00	90.00	BL	Direct Energy	N	0	0	\N
+1	1	659.03	BW	1	2010-07-01 22:49:08.716242	1	2010-12-29 17:10:42.398771	E	F	0.00	0.00	MG	Mortgage 1	N	1	4	\N
+1	4	2192.00	BW	1	2011-05-03 17:51:13.980857	1	2011-05-03 17:51:13.980857	I	F	0.00	0.00	PC	Pay every second Friday	Y	0	1	\N
+\.
+
+
+--
+-- Data for Name: list_of_values; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY list_of_values (lov_cd, lov_cat_cd, lov_desc, crtn_id, crtn_ts, upd_id, upd_ts) FROM stdin;
+E	EXPINCID	Expense	1	2010-07-02 22:16:56.864903	1	2010-07-02 22:16:56.864903
+I	EXPINCID	Income	1	2010-07-02 22:17:29.868874	1	2010-07-02 22:17:29.868874
+WE	FREQENCY	Weekly	1	2010-07-02 22:20:30.900875	1	2010-07-02 22:20:30.900875
+BW	FREQENCY	Bi-Weekly	1	2010-07-02 22:20:54.456749	1	2010-07-02 22:20:54.456749
+BM	FREQENCY	Bi-Monthly	1	2010-07-02 22:21:11.492908	1	2010-07-02 22:21:11.492908
+MO	FREQENCY	Monthly	1	2010-07-02 22:21:24.451879	1	2010-07-02 22:21:24.451879
+F	INEXPTYP	Fixed	1	2010-07-07 17:24:17.672002	1	2010-07-07 17:24:17.672002
+R	INEXPTYP	Range	1	2010-07-07 17:24:35.82632	1	2010-07-07 17:24:35.82632
+ADMIN	GROUP	Administrators security	1	2010-07-19 20:15:58.581279	1	2010-07-19 20:15:58.581279
+MEMBER	GROUP	Regular member security	1	2010-07-19 20:16:26.352289	1	2010-07-19 20:16:26.352289
+OWNER	ACCTACES	Owner of the account	1	2010-08-02 10:19:56.657888	1	2010-08-02 10:19:56.657888
+READ	ACCTACES	read only access	1	2010-08-02 10:20:18.968588	1	2010-08-02 10:20:18.968588
+UPDATE	ACCTACES	Update access	1	2010-08-02 10:20:36.358005	1	2010-08-02 10:20:36.358005
+DEBIT	SRCTYPE	Debits (bank accounts, cash, etc)	1	2010-12-03 17:32:12.613362	1	2010-12-03 17:32:12.613362
+CREDIT	SRCTYPE	credit (cards, line of credit, mortgage)	1	2010-12-03 17:33:03.55195	1	2010-12-03 17:33:03.55195
+INCOMING	TRNSTYPE	Incoming transaction (money comming in)	1	2010-12-09 17:31:23.64118	1	2010-12-09 17:31:23.64118
+OUTGOING	TRNSTYPE	Outgoing transaction (money going out)	1	2010-12-09 17:32:23.868267	1	2010-12-09 17:32:23.868267
+VARIABLE	BUCKTYPE	Variable expenses bucket	1	2011-02-08 17:31:12.024505	1	2011-02-08 17:31:12.024505
+FIXED	BUCKTYPE	Fixed Expenses Bucket	1	2011-02-08 17:31:31.240356	1	2011-02-08 17:31:31.240356
+WEEK	PER	week	1	2011-05-12 17:30:54.192044	1	2011-05-12 17:30:54.192044
+\.
+
+
+--
+-- Data for Name: lov_category; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY lov_category (lov_cat_cd, cat_desc, crtn_id, crtn_ts, upd_id, upd_ts) FROM stdin;
+EXPINCID	Expense/Income indicator	1	2010-07-02 22:15:21.620889	1	2010-07-02 22:15:21.620889
+FREQENCY	Frequency schedule	1	2010-07-02 22:19:04.632928	1	2010-07-02 22:19:04.632928
+INEXPTYP	Income and expense type	1	2010-07-07 17:23:35.290135	1	2010-07-07 17:23:35.290135
+GROUP	Groups that users can be a part of	1	2010-07-19 17:31:06.302903	1	2010-07-19 17:31:06.302903
+ACCTACES	Account access	1	2010-08-02 10:18:36.207202	1	2010-08-02 10:18:36.207202
+SRCTYPE	money source type	1	2010-12-03 17:31:18.528366	1	2010-12-03 17:31:18.528366
+TRNSTYPE	Transaction Type	1	2010-12-09 17:30:24.73675	1	2010-12-09 17:30:24.73675
+BUCKTYPE	Bucket Types	1	2011-02-08 17:30:34.566041	1	2011-02-08 17:30:34.566041
+PER	per week, per day, etc.	1	2011-05-12 17:30:08.027731	1	2011-05-12 17:30:08.027731
+\.
+
+
+--
+-- Data for Name: money_source; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY money_source (acct_id, seq, source_txt, source_type, crtn_id, crtn_ts, upd_id, upd_ts, balance) FROM stdin;
+1	3	line of credit	CREDIT	1	2010-12-08 17:32:12.289513	1	2010-12-08 17:32:12.289513	0.00
+1	4	mortgage	CREDIT	1	2010-12-08 17:32:41.553819	1	2011-01-24 17:26:21.764295	99340.97
+1	2	Savings	DEBIT	1	2010-12-08 17:31:46.146155	1	2011-07-14 17:16:07.185669	900.00
+1	5	American Express	CREDIT	1	2010-12-20 17:21:27.198067	1	2011-07-14 17:18:21.617302	78.26
+1	1	Chequings	DEBIT	1	2010-12-08 17:31:31.299596	1	2011-07-14 17:18:21.617302	226.47
+\.
+
+
+--
+-- Data for Name: redirect; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY redirect (rd_name, rd_page, crtn_id, crtn_ts, upd_id, upd_ts) FROM stdin;
+SITE	http://localhost/	1	2010-08-27 17:18:01.447051	1	2010-08-27 17:18:01.447051
+HOME_PAGE	@SITE@cgi-bin/home.pl	1	2010-08-27 17:16:47.046608	1	2010-08-27 17:16:47.046608
+LOGIN	@SITE@cgi-bin/login.pl	1	2010-08-27 17:16:19.995069	1	2010-08-27 17:16:19.995069
+CRTEACCTSENDREQUEST	@SITE@cgi-bin/createaccountsendrequest.pl	1	2010-08-27 17:22:07.128163	1	2010-08-27 17:22:07.128163
+PROCESSREQUESTS	@SITE@cgi-bin/processrequests.pl	1	2010-09-10 22:44:21.421311	1	2010-09-10 22:44:21.421311
+\.
+
+
+--
+-- Data for Name: transaction_type; Type: TABLE DATA; Schema: public; Owner: richard
+--
+
+COPY transaction_type (typeid, type_desc, crtn_id, crtn_ts, upd_id, upd_ts, acct_id, trans_type, buck_seq) FROM stdin;
+PC	Pay cheque	1	2010-07-11 19:04:53.093376	1	2010-10-14 17:28:37.222111	1	INCOMING	0
+CR	Car	1	2010-06-10 17:34:54.188479	1	2011-04-05 17:25:02.67576	1	OUTGOING	1
+BL	Bill	1	2010-06-10 17:21:26.25546	1	2011-04-06 17:30:04.883228	1	OUTGOING	1
+IN	Insurance	1	2010-06-10 17:21:05.035469	1	2011-04-06 17:30:24.511431	1	OUTGOING	1
+OT	Other	1	2010-06-10 17:20:27.728501	1	2011-04-06 17:30:36.508328	1	OUTGOING	6
+MG	Mortgage	1	2010-06-10 17:17:08.803628	1	2011-04-06 17:30:54.313365	1	OUTGOING	1
+GR	Groceries	1	2010-06-10 17:15:27.567453	1	2011-04-06 17:31:13.51736	1	OUTGOING	3
+CG	Clothing and Gifts	1	2010-06-10 17:17:59.507478	1	2011-04-06 17:31:28.783255	1	OUTGOING	4
+EN	Entertainment	1	2010-06-10 17:18:29.915478	1	2011-04-06 17:31:42.382818	1	OUTGOING	5
+TR	Transportation	1	2010-06-10 17:18:57.347495	1	2011-04-06 17:31:53.862019	1	OUTGOING	2
+TI	Transfer Incoming	1	2011-06-13 19:31:15.506295	1	2011-06-13 19:31:15.506295	1	INCOMING	0
+TO	Transfer Outgoing	1	2011-06-13 19:31:34.548733	1	2011-06-13 19:31:34.548733	1	OUTGOING	0
+\.
+
+
+--
+-- Data for Name: transactions; Type: TABLE DATA; Schema: public; Owner: richard
+--
+
+COPY transactions (acct_id, trans_date, seq, amt, inc_exp_seq, crtn_id, crtn_ts, upd_id, upd_ts, trans_type, trans_txt, ms_seq, in_out) FROM stdin;
+1	2010-07-16	1	57.01	0	1	2010-07-17 00:12:00.015764	1	2010-07-18 17:15:59.282041	TR	Gas for truck	5	OUTGOING
+1	2010-10-23	1	31.00	0	1	2010-10-23 18:36:53.285782	1	2010-10-23 18:36:53.285782	EN	Moxies	5	OUTGOING
+1	2010-10-23	2	81.50	0	1	2010-10-23 18:39:20.692928	1	2010-10-23 18:39:20.692928	TR	Bus Pass	5	OUTGOING
+1	2011-01-07	1	659.03	1	1	2011-01-07 17:43:16.244041	1	2011-01-07 17:43:16.244041		mortgage payment	1	OUTGOING
+1	2011-01-07	2	659.03	1	1	2011-01-07 17:43:16.306179	1	2011-01-07 17:43:16.306179		mortgage payment	4	INCOMING
+1	2011-01-24	1	659.03	1	1	2011-01-24 17:26:21.735445	1	2011-01-24 17:26:21.735445		mortgage payment	1	OUTGOING
+1	2011-01-24	2	659.03	1	1	2011-01-24 17:26:21.758406	1	2011-01-24 17:26:21.758406		mortgage payment	4	INCOMING
+1	2011-01-24	3	100.00	0	1	2011-01-24 17:34:18.299137	1	2011-01-24 17:34:18.299137	TR	Gas	1	OUTGOING
+1	2011-01-24	4	50.76	0	1	2011-01-24 17:34:49.204983	1	2011-01-24 17:34:49.204983	TR	Gas car	5	OUTGOING
+1	2011-04-20	1	81.50	0	1	2011-04-20 17:25:38.324231	1	2011-04-20 17:25:38.324231	TR	Bus Pass	1	OUTGOING
+1	2011-04-20	2	23.50	0	1	2011-04-20 17:32:49.836006	1	2011-04-20 17:34:58.740831	EN	Ricky's Lunch	1	OUTGOING
+1	2011-05-02	1	20.00	0	1	2011-05-02 17:25:39.188957	1	2011-05-02 17:25:39.188957	GR	buns, meat, veg (one dinner)	1	OUTGOING
+1	2011-05-03	1	35.00	0	1	2011-05-03 17:28:36.445567	1	2011-05-03 17:48:29.299059	OT	meds	1	OUTGOING
+1	2011-07-14	1	100.00	0	1	2011-07-14 17:16:07.185669	1	2011-07-14 17:16:07.185669	TO	Transfer from Savings to Chequings	2	OUTGOING
+1	2011-07-14	2	100.00	0	1	2011-07-14 17:16:07.185669	1	2011-07-14 17:16:07.185669	TI	Transfer from Savings to Chequings	1	INCOMING
+1	2011-07-14	3	100.00	0	1	2011-07-14 17:17:57.006954	1	2011-07-14 17:17:57.006954	TO	Transfer from Chequings to American Express	1	OUTGOING
+1	2011-07-14	4	100.00	0	1	2011-07-14 17:17:57.006954	1	2011-07-14 17:17:57.006954	TI	Transfer from Chequings to American Express	5	INCOMING
+1	2011-07-14	5	100.00	0	1	2011-07-14 17:18:21.617302	1	2011-07-14 17:18:21.617302	TO	Transfer from American Express to Chequings	5	OUTGOING
+1	2011-07-14	6	100.00	0	1	2011-07-14 17:18:21.617302	1	2011-07-14 17:18:21.617302	TI	Transfer from American Express to Chequings	1	INCOMING
+\.
+
+
+--
+-- Data for Name: user_accounts; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY user_accounts (userid, crtn_id, crtn_ts, upd_id, upd_ts, access, acct_id) FROM stdin;
+1	1	2010-08-02 09:13:30.826904	1	2010-08-02 09:13:30.826904	OWNER	1
+1	1	2010-11-01 17:25:52.703163	1	2010-11-01 17:25:52.703163	OWNER	2
+2	1	2010-12-02 17:47:34.293124	1	2010-12-02 17:47:34.293124	UPDATE	1
+\.
+
+
+--
+-- Data for Name: user_groups; Type: TABLE DATA; Schema: public; Owner: www-data
+--
+
+COPY user_groups (userid, group_cd, crtn_id, crtn_ts, upd_id, upd_ts) FROM stdin;
+1	ADMIN	1	2010-08-04 22:11:39.634768	1	2010-08-04 22:11:39.634768
+1	MEMBER	1	2010-11-30 17:14:11.266645	1	2010-11-30 17:14:11.266645
+2	MEMBER	1	2010-11-30 17:20:04.571231	1	2010-11-30 17:20:04.571231
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: richard
+--
+
+COPY users (userid, user_first_nm, user_sur_nm, user_nickname, user_email, crtn_id, crtn_ts, upd_id, upd_ts, password, last_acct_id) FROM stdin;
+1	Richard	Dickerson	pikestriker	dickerson79@hotmail.com	1	2010-05-22 21:44:57.284501	1	2010-12-02 17:35:32.154519	3d79bc18202fd899d453e3b8e3d9aae0	1
+2	Christine	Dickerson	purinton_05	purinton_05@hotmail.com	1	2010-11-30 17:19:13.43615	2	2010-12-02 17:48:46.619561	9eb0a7f1e0924dc7c988e7cc2f9ba7a0	1
+\.
+
+
+--
+-- Name: accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY accounts
+    ADD CONSTRAINT accounts_pkey PRIMARY KEY (acct_id);
+
+
+--
+-- Name: buckets_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY buckets
+    ADD CONSTRAINT buckets_pkey PRIMARY KEY (acct_id, seq);
+
+
+--
+-- Name: fixed_expenses_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY income_expense
+    ADD CONSTRAINT fixed_expenses_pkey PRIMARY KEY (acct_id, seq);
+
+
+--
+-- Name: frequency_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY frequency
+    ADD CONSTRAINT frequency_pkey PRIMARY KEY (freq_cd);
+
+
+--
+-- Name: group_scripts_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY group_scripts
+    ADD CONSTRAINT group_scripts_pkey PRIMARY KEY (group_cd, script_name);
+
+
+--
+-- Name: list_of_values_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY list_of_values
+    ADD CONSTRAINT list_of_values_pkey PRIMARY KEY (lov_cd, lov_cat_cd);
+
+
+--
+-- Name: lov_category_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY lov_category
+    ADD CONSTRAINT lov_category_pkey PRIMARY KEY (lov_cat_cd);
+
+
+--
+-- Name: money_source_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY money_source
+    ADD CONSTRAINT money_source_pkey PRIMARY KEY (acct_id, seq);
+
+
+--
+-- Name: redirect_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY redirect
+    ADD CONSTRAINT redirect_pkey PRIMARY KEY (rd_name);
+
+
+--
+-- Name: transaction_type_pkey; Type: CONSTRAINT; Schema: public; Owner: richard; Tablespace: 
+--
+
+ALTER TABLE ONLY transaction_type
+    ADD CONSTRAINT transaction_type_pkey PRIMARY KEY (typeid, acct_id);
+
+
+--
+-- Name: transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: richard; Tablespace: 
+--
+
+ALTER TABLE ONLY transactions
+    ADD CONSTRAINT transactions_pkey PRIMARY KEY (acct_id, trans_date, seq);
+
+
+--
+-- Name: user_accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY user_accounts
+    ADD CONSTRAINT user_accounts_pkey PRIMARY KEY (userid, acct_id);
+
+
+--
+-- Name: user_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: www-data; Tablespace: 
+--
+
+ALTER TABLE ONLY user_groups
+    ADD CONSTRAINT user_groups_pkey PRIMARY KEY (userid, group_cd);
+
+
+--
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: richard; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (userid);
+
+
+--
+-- Name: unique_email; Type: INDEX; Schema: public; Owner: richard; Tablespace: 
+--
+
+CREATE UNIQUE INDEX unique_email ON users USING btree (user_email);
+
+
+--
+-- Name: unique_nickname; Type: INDEX; Schema: public; Owner: richard; Tablespace: 
+--
+
+CREATE UNIQUE INDEX unique_nickname ON users USING btree (user_nickname);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- Name: transaction_type; Type: ACL; Schema: public; Owner: richard
+--
+
+REVOKE ALL ON TABLE transaction_type FROM PUBLIC;
+REVOKE ALL ON TABLE transaction_type FROM richard;
+GRANT ALL ON TABLE transaction_type TO richard;
+GRANT ALL ON TABLE transaction_type TO "www-data";
+
+
+--
+-- Name: transactions; Type: ACL; Schema: public; Owner: richard
+--
+
+REVOKE ALL ON TABLE transactions FROM PUBLIC;
+REVOKE ALL ON TABLE transactions FROM richard;
+GRANT ALL ON TABLE transactions TO richard;
+GRANT ALL ON TABLE transactions TO "www-data";
+
+
+--
+-- Name: users; Type: ACL; Schema: public; Owner: richard
+--
+
+REVOKE ALL ON TABLE users FROM PUBLIC;
+REVOKE ALL ON TABLE users FROM richard;
+GRANT ALL ON TABLE users TO richard;
+GRANT ALL ON TABLE users TO "www-data";
+
+
+--
+-- PostgreSQL database dump complete
+--
+
