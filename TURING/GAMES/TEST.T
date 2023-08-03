@@ -55,7 +55,7 @@ var stream : int
 var world1, world2 : int
 world1 := 1
 world2 := 1
-open : stream, "a:/turing/games/world/world1_1" + ".wor", get
+open : stream, "d:/turing/games/world/world1_1" + ".wor", get
 var tempx, tempy : int := 1
 for i : 1 .. 9
     tempx := 1
@@ -67,7 +67,7 @@ for i : 1 .. 9
     end for
     tempy := tempy + 20
 end for
-open : stream, "a:/turing/games/pictures/lanh1.pic", get
+open : stream, "d:/turing/games/pictures/lanh1.pic", get
 for i : 1 .. 20
     for j : 1 .. 20
 	get : stream, hero (i, j)
@@ -91,11 +91,13 @@ loop
 		land (x, y - 20, grid (ygrid - 1, xgrid), clr_2
 		    (ygrid - 1, xgrid))
 	    end if
-	    open : stream, "a:/turing/games/pictures/lanh4.pic", get
+	    open : stream, "d:/turing/games/pictures/lanh3.pic", get
 	    for i : 1 .. 20
 		for j : 1 .. 20
 		    get : stream, hero (i, j)
-		    drawdot (j + x, i + y, hero (i, j))
+		    if hero (i, j) > 0 then
+			drawdot (j + x, i + y, hero (i, j))
+		    end if
 		end for
 	    end for
 	    close : stream
@@ -112,7 +114,7 @@ loop
 		    (ygrid,
 		    xgrid - 1))
 	    end if
-	    open : stream, "a:/turing/games/pictures/lanh2.pic", get
+	    open : stream, "d:/turing/games/pictures/lanh2.pic", get
 	    for i : 1 .. 20
 		for j : 1 .. 20
 		    get : stream, hero (i, j)
@@ -133,7 +135,7 @@ loop
 		    (ygrid,
 		    xgrid + 1))
 	    end if
-	    open : stream, "a:/turing/games/pictures/lanh3.pic", get
+	    open : stream, "d:/turing/games/pictures/lanh4.pic", get
 	    for i : 1 .. 20
 		for j : 1 .. 20
 		    get : stream, hero (i, j)
@@ -155,7 +157,7 @@ loop
 		    1,
 		    xgrid))
 	    end if
-	    open : stream, "a:/turing/games/pictures/lanh1.pic", get
+	    open : stream, "d:/turing/games/pictures/lanh1.pic", get
 	    for i : 1 .. 20
 		for j : 1 .. 20
 		    get : stream, hero (i, j)
