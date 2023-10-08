@@ -1,5 +1,10 @@
-setscreen ("graphics:m256")
+setscreen ("graphics")
 setscreen ("nocursor")
+color(0)
+colorback(7)
+var spriteWidth :int := 57
+var spriteHeight :int := 67
+var backColour :int := 7
 var enemy : int
 var HP : array 1 .. 3 of int
 var file : string
@@ -19,29 +24,44 @@ var defence : array 1 .. 3 of int
 var enemy_3 : array 1 .. 3 of string
 var gold : array 1 .. 3 of int
 var EXP : array 1 .. 3 of int
-var nums : array 1 .. 67, 1 .. 57 of int
+var nums : array 1 .. spriteHeight, 1 .. spriteWidth of int
+drawfillbox(0, 0, maxx, maxy, backColour)
 for i : 1 .. 3
     enemy_3 (i) := ""
 end for
-procedure arrow (x, clr : int)
-    drawdot (x, 122, clr)
-    drawdot (x, 123, clr)
-    drawdot (x, 124, clr)
-    drawdot (x, 120, clr)
-    drawdot (x, 121, clr)
-    drawdot (x, 119, clr)
-    drawdot (x, 118, clr)
-    drawdot (x - 3, 121, clr)
-    drawdot (x + 3, 121, clr)
-    drawdot (x - 2, 120, clr)
-    drawdot (x - 1, 119, clr)
-    drawdot (x + 2, 120, clr)
-    drawdot (x + 1, 119, clr)
+procedure arrow (x, y, clr : int)
+    drawfillbox (x, y, x + 1, y + 8, clr)
+    drawfillbox (x - 3, y + 3, x + 4, y + 3, clr)
+    drawfillbox (x - 2, y + 2, x + 3, y + 2, clr)
+    drawfillbox (x - 1, y + 1, x + 2, y + 1, clr)
 end arrow
+
+procedure drawSprite (startX, startY :int, spriteName : string)
+    var stream_num : int
+    open : stream_num, spriteName + ".pic", get
+    var num : array 1 .. spriteHeight, 1 .. spriteWidth of int
+    for y : 1 .. spriteHeight
+	for x : 1 .. spriteWidth
+	    get : stream_num, num (y, x)
+	    drawdot (x + startX, y + startY, num (y, x))
+	end for
+    end for
+    
+    close : stream_num
+end drawSprite
+
+procedure killSprite (startX, startY, colour :int)
+    for y : 1 .. spriteHeight
+	for x : 1 .. spriteWidth
+	    drawdot (x + startX, y + startY, colour)
+	end for
+    end for
+end killSprite
+
 randomize
 randint (num_enemy, 1, 3)
 for i : 1 .. num_enemy
-    randint (enemy, 1, 3)
+    randint (enemy, 1, 4)
     if enemy = 1 then
 	HP (i) := 30
 	minattack (i) := 2
@@ -66,6 +86,14 @@ for i : 1 .. num_enemy
 	file := "drued"
 	gold (i) := 10
 	EXP (i) := 20
+    elsif enemy = 4 then
+	HP(i) := 200
+	minattack(i) := 8
+	maxattack(i) := 30
+	defence(i) := 15
+	file := "evilbun"
+	gold(i) := 200
+	EXP(i) := 200
     end if
     enemy_3 (i) := file
     t_HP := t_HP + HP (i)
@@ -73,39 +101,26 @@ for i : 1 .. num_enemy
     t_gold := t_gold + gold (i)
 end for
 for i : 1 .. num_enemy
-    open : stream (1), enemy_3 (i) + ".pic",
-	get
-    var num : array 1 .. 67, 1 .. 57 of int
-    for x : 1 .. 67
-	for j : 1 .. 57
-	    get : stream (1), num (x, j)
-	    drawdot (j + count, x + 52, num (x, j))
-	end for
-    end for
+    drawSprite (count, 74, enemy_3(i))
     count := count + 58
 end for
 var stream_num : int
-open : stream_num, "hero1.pic", get
-for i : 1 .. 67
-    for j : 1 .. 57
-	get : stream_num, nums (i, j)
-	drawdot (j + 240, i + 52, nums (i, j))
-    end for
-end for
+drawSprite (maxx - 90, 74, "hero1")
 loop
-    locate (4, 32)
-    color (15)
+    locate (4, 70)
     put "RICHARD"
-    locate (5, 32)
+    locate (5, 70)
     put rich, "/600"
-    drawbox (0, maxy, 0 + 225, maxy - 150, 15)
-    drawbox (maxx, maxy, maxx - 85, maxy - 150, 15)
     locate (22, 1)
-    color (4)
+    color(4)
     put "ATTACK"
     locate (24, 1)
-    color (15)
+    color(0)
     put "RUN"
+    drawbox (0, 70, maxx - 100, maxy, 0)
+    drawbox (0, 71, maxx - 101, maxy, 0)
+    drawbox (maxx - 98, 70, maxx, maxy, 0)
+    drawbox (maxx - 97, 71, maxx, maxy, 0)
     const UP_ARROW : int := 200
     const DOWN_ARROW : int := 208
     const ENTER : int := 10
@@ -117,7 +132,7 @@ loop
 	case ord (ch) of
 	    label UP_ARROW :
 		locate (24, 1)
-		color (15)
+		color (0)
 		put "RUN"
 		locate (22, 1)
 		color (4)
@@ -125,7 +140,7 @@ loop
 		command := "attack"
 	    label DOWN_ARROW :
 		locate (22, 1)
-		color (15)
+		color (0)
 		put "ATTACK"
 		locate (24, 1)
 		color (4)
@@ -148,40 +163,36 @@ loop
     if command = "attack" then
 	locate (23, 1)
 	put "PLEASE CHOOSE ENEMY"
-	var x : int := 29
+	var x : int := 27
+	var y : int := 145
 	count := 2
 	xgrid := 1
-	arrow (x, 4)
+	arrow (x, y, 0)
 	loop
 	    const RIGHT_ARROW : int := 205
 	    const LEFT_ARROW : int := 203
 	    getch (ch)
 	    case ord (ch) of
 		label RIGHT_ARROW :
-		    arrow (x, 0)
-		    if xgrid = 3 then
-			sound (400, 200)
-		    else
+		    arrow (x, y, 7)
+		    if not xgrid = 3 then
 			x := x + 58
 			count := count + 58
 			xgrid := xgrid + 1
 		    end if
-		    arrow (x, 4)
+		    arrow (x, y, 0)
 		label LEFT_ARROW :
-		    arrow (x, 0)
-		    if xgrid = 1 then
-			sound (400, 200)
-		    else
+		    arrow (x, y, 7)
+		    if not xgrid = 1 then
 			x := x - 58
 			count := count - 58
 			xgrid := xgrid - 1
 		    end if
-		    arrow (x, 4)
+		    arrow (x, y, 0)
 		label ENTER :
 		    if enemy_3 (xgrid) = "" then
-			sound (400, 200)
 			locate (24, 1)
-			color (15)
+			color (0)
 			put "No enemy there"
 			delay (1000)
 			locate (24, 1)
@@ -189,37 +200,25 @@ loop
 		    else
 			locate (23, 1)
 			put ""
-			arrow (x, 0)
+			arrow (x, y, 7)
 			exit
 		    end if
 		label :
-		    color (15)
+		    color (0)
 		    locate (23, 1)
 		    put "SORRY WRONG KEY"
 		    locate (23, 1)
 		    put ""
 	    end case
 	end loop
-	open : stream_num, "hero2.pic", get
-	for i : 1 .. 67
-	    for j : 1 .. 57
-		get : stream_num, nums (i, j)
-		drawdot (j + 240, i + 52, nums (i, j))
-	    end for
-	end for
-	close : stream_num
-	open : stream_num, "hero1.pic", get
-	for i : 1 .. 67
-	    for j : 1 .. 57
-		get : stream_num, nums (i, j)
-		drawdot (j + 240, i + 52, nums (i, j))
-	    end for
-	end for
-	close : stream_num
+	drawSprite(maxx - 90, 74, "hero2")
+	delay(500)
+	drawSprite(maxx - 90, 74, "hero1")
+
 	randomize
 	randint (attack, 2, rich_attack - defence (xgrid))
 	locate (22, 1)
-	color (15)
+	color (0)
 	put "damage is ", attack, " HP  to the enemy"
 	delay (1000)
 	locate (22, 1)
@@ -234,7 +233,7 @@ loop
 	    exit
 	else
 	    locate (23, 1)
-	    color (15)
+	    color (0)
 	    put "CAN'T RUN"
 	    delay (1000)
 	    locate (23, 1)
@@ -243,60 +242,22 @@ loop
     end if
     if HP (xgrid) <= 0 then
 	enemy_3 (xgrid) := ""
-	for i : 1 .. 67
-	    for j : 1 .. 57
-		drawdot (j + count, i + 52, 0)
-	    end for
-	end for
+	killSprite(count, 74, 7)
     end if
     exit when t_HP <= 0
     count := 2
     for x : 1 .. num_enemy
-	if enemy_3 (x) = "wizard" then
-	    open : stream (2), enemy_3 (x) + "2.pic",
-		get
-	    for i : 1 .. 67
-		for j : 1 .. 57
-		    get : stream (2), nums (i, j)
-		    drawdot (j + count, i + 52, nums (i, j))
-		end for
-	    end for
-	    close : stream (2)
-	    open : stream (3), enemy_3 (x) + ".pic", get
-	    var num : array 1 .. 67, 1 .. 57 of int
-	    for i : 1 .. 67
-		for j : 1 .. 57
-		    get : stream (3), num (i, j)
-		    drawdot (j + count, i + 52, num (i, j))
-		end for
-	    end for
-	    close : stream (3)
-	elsif enemy_3 (x) = "drued" then
-	    open : stream (4), enemy_3 (x) + "2.pic",
-		get
-	    for i : 1 .. 67
-		for j : 1 .. 57
-		    get : stream (4), nums (i, j)
-		    drawdot (j + count, i + 52, nums (i, j))
-		end for
-	    end for
-	    close : stream (4)
-	    open : stream (5), enemy_3 (x) + ".pic", get
-	    var num : array 1 .. 67, 1 .. 57 of int
-	    for i : 1 .. 67
-		for j : 1 .. 57
-		    get : stream (5), num (i, j)
-		    drawdot (j + count, i + 52, num (i, j))
-		end for
-	    end for
-	    close : stream (5)
+	if not (enemy_3 (x) = "skeleton" or enemy_3 (x) = "evilbun") then
+	    var attackSprite : string := enemy_3 (x) + "2"
+	    drawSprite(count, 74, attackSprite)
+	    delay(500)
+	    drawSprite(count, 74, enemy_3(x))
 	end if
-	if enemy_3 (x) = "" then
-	else
+	if not enemy_3 (x) = "" then
 	    randint (attack, minattack (x), maxattack (x) - rich_defence)
 	    locate (22, 1)
-	    color (15)
-	    put "damage is ", attack, " HP to rich"
+	    color (0)
+	    put enemy_3(x) + "'s damage is ", attack, " HP to rich"
 	    rich := rich - attack
 	end if
 	if rich <= 0 then
@@ -311,9 +272,5 @@ loop
     put ""
 end loop
 if rich <= 0 then
-    for i : 1 .. 67
-	for j : 1 .. 57
-	    drawdot (j + 240, i + 52, 0)
-	end for
-    end for
+    killSprite(maxx - 90, 74, 7)
 end if
