@@ -191,18 +191,18 @@ loop
 			end if
 			locate (1, 1)
 			put colr
-			drawfillbox (150, 190, 150 + 10, 190 + 9, colr)
+			drawfillbox (maxx, maxy, maxx - tileWidth + 1, maxy - tileHeight + 1, colr)
 		    label DOWN_ARROW :
 			if not colr = 0 then
 			    colr := colr - 1
 			end if
 			locate (1, 1)
 			put colr
-			drawfillbox (150, 190, 150 + 10, 190 + 9, colr)
+			drawfillbox (maxx, maxy, maxx - tileWidth + 1, maxy - tileHeight + 1, colr)
 		    label ESC :
 			locate (1, 1)
 			put ""
-			drawfillbox (150, 190, 150 + 10, 190 + 9, 0)
+			drawfillbox (maxx, maxy, maxx - tileWidth + 1, maxy - tileHeight + 1, 0)
 			exit
 		    label :
 		end case
