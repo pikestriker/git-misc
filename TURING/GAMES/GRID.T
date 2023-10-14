@@ -1,30 +1,44 @@
-setscreen ("graphics:m256")
+setscreen ("graphics")
 setscreen ("noecho")
 setscreen ("nocursor")
+
+var tileWidth : int := 40
+var tileHeight : int := 40
+var boxSize :int := floor(tileWidth / 16)
 procedure land (x, y, clr1, clr2 : int)
-    drawfillbox (x, y, x + 19, y + 19, clr1)
-    drawdot (x + 5, y + 5, clr2)
-    drawdot (x + 6, y + 4, clr2)
-    drawdot (x + 7, y + 4, clr2)
-    drawdot (x + 8, y + 5, clr2)
-    drawdot (x + 9, y + 4, clr2)
-    drawdot (x + 10, y + 4, clr2)
-    drawdot (x + 11, y + 5, clr2)
-    drawdot (x + 12, y + 4, clr2)
-    drawdot (x + 13, y + 4, clr2)
-    drawdot (x + 14, y + 4, clr2)
-    drawdot (x + 15, y + 5, clr2)
-    drawdot (x + 5, y + 15, clr2)
-    drawdot (x + 6, y + 14, clr2)
-    drawdot (x + 7, y + 14, clr2)
-    drawdot (x + 8, y + 15, clr2)
-    drawdot (x + 9, y + 14, clr2)
-    drawdot (x + 10, y + 14, clr2)
-    drawdot (x + 11, y + 15, clr2)
-    drawdot (x + 12, y + 14, clr2)
-    drawdot (x + 13, y + 14, clr2)
-    drawdot (x + 14, y + 15, clr2)
-    drawdot (x + 15, y + 15, clr2)
+    drawfillbox (x, y, x + tileWidth - 1, y + tileHeight - 1, clr1)
+    var startX :int := x + floor(tileWidth / 2) - (7 * boxSize)
+    var startY :int := y + floor(tileHeight / 4)
+    
+    var curX :int := startX
+    var curY :int := startY
+    for i : 1 .. 22
+	curX := curX + boxSize
+	% I wanted to use this for two functions.  First to draw a dot (so a box
+	% the size of one pixel) and to draw a box instead of a pixel if the tile
+	% was bigger.  Using it to draw a dot doesn't seem to work though
+	if boxSize > 1 then
+	    drawfillbox (curX, curY, curX + boxSize - 1, curY + boxSize - 1, clr2)
+	else
+	    drawdot (curX, curY, clr2)
+	end if
+	
+	%what x pixel are we at?
+	% couldn't figure out sets for this if statement
+	var xPixel : int := i mod 11
+	if xPixel = 2 or xPixel = 3 or xPixel = 5 or xPixel = 6 or
+	   xPixel = 8 or xPixel = 9 then
+	    curY := startY - (1 * boxSize)
+	else
+	    curY := startY
+	end if
+	
+	if i = 11 then
+	    startY := startY + floor(tileHeight / 2)
+	    curY := startY
+	    curX := startX
+	end if
+    end for
 end land
 var ch : string (1)
 var grid : array 1 .. 9, 1 .. 16 of int
@@ -55,57 +69,50 @@ var file : string
 var stream : int
 loop
     locate (1, 1) put grid (ygrid, xgrid), " ", clr_2 (ygrid, xgrid)
+    locate (2, 1) put boxSize
     getch (ch)
     case ord (ch) of
 	label UP_ARROW :
 	    land (x, y, 0, 0)
-	    if ygrid = 9 then
-		sound (400, 200)
-	    else
-		y := y + 20
+	    if not ygrid = 9 then
+		y := y + tileHeight
 		ygrid := ygrid + 1
 	    end if
 	    if ygrid not= 1 then
-		land (x, y - 20, grid (ygrid - 1, xgrid), clr_2 (ygrid - 1,
+		land (x, y - tileHeight, grid (ygrid - 1, xgrid), clr_2 (ygrid - 1,
 		    xgrid))
 	    end if
 	    land (x, y, clr, clr2)
 	label RIGHT_ARROW :
 	    land (x, y, 0, 0)
-	    if xgrid = 16 then
-		sound (400, 200)
-	    else
-		x := x + 20
+	    if not xgrid = 16 then
+		x := x + tileWidth
 		xgrid := xgrid + 1
 	    end if
 	    if xgrid not= 1 then
-		land (x - 20, y, grid (ygrid, xgrid - 1), clr_2 (ygrid,
+		land (x - tileWidth, y, grid (ygrid, xgrid - 1), clr_2 (ygrid,
 		    xgrid - 1))
 	    end if
 	    land (x, y, clr, clr2)
 	label LEFT_ARROW :
 	    land (x, y, 0, 0)
-	    if xgrid = 1 then
-		sound (400, 200)
-	    else
-		x := x - 20
+	    if not xgrid = 1 then
+		x := x - tileWidth
 		xgrid := xgrid - 1
 	    end if
 	    if xgrid not= 16 then
-		land (x + 20, y, grid (ygrid, xgrid + 1), clr_2 (ygrid,
+		land (x + tileWidth, y, grid (ygrid, xgrid + 1), clr_2 (ygrid,
 		    xgrid + 1))
 	    end if
 	    land (x, y, clr, clr2)
 	label DOWN_ARROW :
 	    land (x, y, 0, 0)
-	    if ygrid = 1 then
-		sound (400, 200)
-	    else
-		y := y - 20
+	    if not ygrid = 1 then
+		y := y - tileHeight
 		ygrid := ygrid - 1
 	    end if
 	    if ygrid not= 10 then
-		land (x, y + 20, grid (ygrid + 1, xgrid), clr_2 (ygrid +
+		land (x, y + tileHeight, grid (ygrid + 1, xgrid), clr_2 (ygrid +
 		    1,
 		    xgrid))
 	    end if
@@ -148,7 +155,7 @@ loop
 	    put "Load what file? " ..
 	    setscreen ("echo")
 	    get file
-	    file := "a:/turing/games/world/" + file + ".wor"
+	    file := file + ".wor"
 	    locate (1, 1)
 	    put ""
 	    open : stream, file, get
@@ -166,9 +173,9 @@ loop
 			get : stream, grid (i, j)
 			get : stream, clr_2 (i, j)
 			land (tempx, tempy, grid (i, j), clr_2 (i, j))
-			tempx := tempx + 20
+			tempx := tempx + tileWidth
 		    end for
-		    tempy := tempy + 20
+		    tempy := tempy + tileHeight
 		end for
 		close : stream
 	    end if
@@ -179,18 +186,14 @@ loop
 		getch (ch)
 		case ord (ch) of
 		    label UP_ARROW :
-			if colr = 255 then
-			    sound (400, 200)
-			else
+			if not colr = 255 then
 			    colr := colr + 1
 			end if
 			locate (1, 1)
 			put colr
 			drawfillbox (150, 190, 150 + 10, 190 + 9, colr)
 		    label DOWN_ARROW :
-			if colr = 0 then
-			    sound (400, 200)
-			else
+			if not colr = 0 then
 			    colr := colr - 1
 			end if
 			locate (1, 1)
