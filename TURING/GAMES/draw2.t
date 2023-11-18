@@ -8,7 +8,7 @@ colorback (7)
 %I'm going to make the pixels bigger as well (boxes)
 var picWidth : int := 57
 var picHeight : int := 67
-var scale : int := 7
+var scale : int := 1
 var boxSize : int := 1
 % this is the newest addition since 0 is now white in the windows version (7 is black)
 var backColour : int := 7
@@ -40,12 +40,12 @@ procedure cursor (var x, y : int, clr : int)
     end if
     
     % this was just debugging stuff
-    drawfillbox (0, 0, boxSize + 1, boxSize + 1, 7)
-    drawfillbox (0, 0, boxSize, boxSize, 10)
-    drawdot(10, 20, 10)
-    drawdot(11, 20, 10)
-    drawdot(10, 21, 10)
-    drawdot(11, 21, 10)
+    % drawfillbox (0, 0, boxSize + 1, boxSize + 1, 7)
+    % drawfillbox (0, 0, boxSize, boxSize, 10)
+    % drawdot(10, 20, 10)
+    % drawdot(11, 20, 10)
+    % drawdot(10, 21, 10)
+    % drawdot(11, 21, 10)
 end cursor
 procedure set_up
     drawfillbox (0, 0, maxx, maxy, 7)
@@ -148,10 +148,10 @@ end fillOldCurPos
 loop
     locate (2, 1)
     put "DOT COLOUR : ", find_color (ygrid, xgrid)
-    locate (3, 1)
-    put "x: ", x
-    locate (4, 1)
-    put "y: ", y
+    % locate (3, 1)
+    % put "x: ", x
+    % locate (4, 1)
+    % put "y: ", y
     locate (1, 10)
     put colr
     getch (ch)
@@ -268,14 +268,18 @@ loop
 	    ywhere := ygrid
 	    loop
 		find_color (ygrid, xgrid) := colr
-		drawdot (x, y, colr)
+		if scale = 1 then
+		    drawdot (x, y, colr)
+		else
+		    drawfillbox (x, y, x + scale - 1, y + scale - 1, colr)
+		end if
 		getch (reply)
 		case ord (reply) of
 		    label UP_ARROW :
 			cursor (x, y, 7)
 			if ygrid not= picHeight then
 			    fillOldCurPos
-			    y := y + 1
+			    y := y + scale
 			    ygrid := ygrid + 1
 			end if
 			cursor (x, y, cur_clr)
@@ -284,7 +288,7 @@ loop
 			if xgrid not= picWidth then
 			    fillOldCurPos
 			    xgrid := xgrid + 1
-			    x := x + 1
+			    x := x + scale
 			end if
 			cursor (x, y, cur_clr)
 		    label LEFT_ARROW :
@@ -292,7 +296,7 @@ loop
 			if xgrid not= 1 then
 			    fillOldCurPos
 			    xgrid := xgrid - 1
-			    x := x - 1
+			    x := x - scale
 			end if
 			cursor (x, y, cur_clr)
 		    label DOWN_ARROW :
@@ -300,7 +304,7 @@ loop
 			if ygrid not= 1 then
 			    fillOldCurPos
 			    ygrid := ygrid - 1
-			    y := y - 1
+			    y := y - scale
 			end if
 			cursor (x, y, cur_clr)
 		    label ESC :
