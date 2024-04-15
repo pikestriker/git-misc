@@ -7,6 +7,7 @@ namespace Editor3D
 {
     public class Game : GameWindow
     {
+        GameLevel curLevel = new GameLevel();
         public Game(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = (width, height), Title = title })
         { 
         }
@@ -16,6 +17,8 @@ namespace Editor3D
             base.OnLoad();
 
             GL.ClearColor(0.0f, 0.24f, 0.51f, 0.0f);
+            curLevel.LoadLevelv2("wallsv2.txt");
+            curLevel.SaveLevelv2("walls-savev2.txt");
 
             //Code goes here
         }
