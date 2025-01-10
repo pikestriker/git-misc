@@ -29,6 +29,17 @@ namespace Editor3D
     internal class GameLevel
     {
         List<sectorType> sectors = new List<sectorType>();
+        float centerPointX, centerPointY, centerPointZ;
+        float[,] rgb = { { 1.0f, 1.0f, 0.0f},               //yellow
+                         { 0.625f, 0.625f, 0.0f },          //darker yellow
+                         { 0.0f, 1.0f, 0.0f },              //green
+                         { 0.0f, 0.625f, 0.0f },            //darker green
+                         { 0.0f, 1.0f, 1.0f },              //cyan
+                         { 0.0f, 0.625f, 0.625f },          //darker cyan
+                         { 0.625f, 0.391f, 0.0f },          //brown
+                         { 0.43f, 0.195f, 0.0f },           //darker brown
+                         { 0.0f, 0.234f, 0.508f }           //background colour
+                       };
 
         public void SaveLevelv2(string filename)
         {
@@ -66,6 +77,8 @@ namespace Editor3D
             int numWalls = 0;
             int curWallCount = 0;
             int curVertCount = 0;
+            int maxX = -1000000, maxY = -1000000, maxZ = -1000000;
+            int minX = 1000000, minY = 1000000, minZ = 1000000;
             bool topBottomExpected = true;
             bool wallColorExpected = true;
             sectorType curSector = null;
@@ -126,9 +139,27 @@ namespace Editor3D
 
                         //the line currently contains an x, y, z coordinate
                         string[] splitLine = line.Split(" ");
-                        curWall.verts[curVertCount].x = int.Parse(splitLine[0].Trim());
-                        curWall.verts[curVertCount].y = int.Parse(splitLine[1].Trim());
-                        curWall.verts[curVertCount].z = int.Parse(splitLine[2].Trim());
+                        int x = int.Parse(splitLine[0].Trim());
+                        int y = int.Parse(splitLine[1].Trim());
+                        int z = int.Parse(splitLine[2].Trim());
+                        curWall.verts[curVertCount].x = x;
+                        curWall.verts[curVertCount].y = y;
+                        curWall.verts[curVertCount].z = z;
+
+                        if (x < minX)
+                            minX = x;
+                        if (y < minY)
+                            minY = y;
+                        if (z < minZ)
+                            minZ = z;
+
+                        if (x > maxX)
+                            maxX = x;
+                        if (y > maxY)
+                            maxY = y;
+                        if (z > maxZ)
+                            maxZ = z;
+
                         curVertCount++;
                         if (curVertCount == 4)
                         {
@@ -154,7 +185,71 @@ namespace Editor3D
                 curSector.walls.Add(curWall);
                 sectors.Add(curSector);
             }
+
+            centerPointX = maxX - minX;
+            centerPointY = maxY - minY;
+            centerPointZ = maxZ - minZ;
+
             sr.Close();
+        }
+
+        public float[] getVertices()
+        {
+            List<float> vertices = new List<float>();
+
+            foreach (var sector in sectors)
+            {
+                foreach (var wall in sector.walls)
+                {
+                    foreach (var vert in wall.verts)
+                    {
+                        // lets normalize the coordinates before we do this
+                        float x = vert.x - centerPointX;
+                        float y = vert.y - centerPointY;
+                        float z = vert.z - centerPointZ;
+                        float length = (float)Math.Sqrt(x*x + y*y + z*z);
+                        vertices.Add(x / length);
+                        vertices.Add(y / length);
+                        vertices.Add(z / length);
+                    }
+                }
+            }
+
+            return vertices.ToArray();
+        }
+
+        public float[] getVerticesWithColour()
+        {
+            List<float> vertices = new List<float>();
+
+            foreach (var sector in sectors)
+            {
+                foreach (var wall in sector.walls)
+                {
+                    foreach (var vert in wall.verts)
+                    {
+                        // lets normalize the coordinates before we do this
+                        float x = vert.x - centerPointX;
+                        float y = vert.y - centerPointY;
+                        float z = vert.z - centerPointZ;
+                        float length = (float)Math.Sqrt(x * x + y * y + z * z);
+                        vertices.Add(x / length);
+                        vertices.Add(y / length);
+                        vertices.Add(z / length);
+                        vertices.Add(rgb[wall.color, 0]);
+                        vertices.Add(rgb[wall.color, 1]);
+                        vertices.Add(rgb[wall.color, 2]);
+                    }
+                }
+            }
+
+            return vertices.ToArray();
+        }
+
+        public int[] getIndices()
+        {
+            List<int> indices = new List<int>();
+            return indices.ToArray();
         }
     }
 }
