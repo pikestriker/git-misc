@@ -30,6 +30,7 @@ namespace Editor3D
     {
         List<sectorType> sectors = new List<sectorType>();
         float centerPointX, centerPointY, centerPointZ;
+        float maxCoord;
         float[,] rgb = { { 1.0f, 1.0f, 0.0f},               //yellow
                          { 0.625f, 0.625f, 0.0f },          //darker yellow
                          { 0.0f, 1.0f, 0.0f },              //green
@@ -186,9 +187,10 @@ namespace Editor3D
                 sectors.Add(curSector);
             }
 
-            centerPointX = maxX - minX;
-            centerPointY = maxY - minY;
-            centerPointZ = maxZ - minZ;
+            centerPointX = (maxX - minX) / 2 + minX;
+            centerPointY = (maxY - minY) / 2 + minY;
+            centerPointZ = (maxZ - minZ) / 2 + minZ;
+            maxCoord = Math.Max(centerPointX, Math.Max(centerPointY, centerPointZ));
 
             sr.Close();
         }
@@ -228,14 +230,14 @@ namespace Editor3D
                 {
                     foreach (var vert in wall.verts)
                     {
-                        // lets normalize the coordinates before we do this
+                        // center the objects on the screen and divide by a scale factor to fit between -1.0 and 1.0 values
                         float x = vert.x - centerPointX;
                         float y = vert.y - centerPointY;
                         float z = vert.z - centerPointZ;
-                        float length = (float)Math.Sqrt(x * x + y * y + z * z);
-                        vertices.Add(x / length);
-                        vertices.Add(y / length);
-                        vertices.Add(z / length);
+                        // swapped the y and z values because they are flipped in the C++ program that can navigate the world
+                        vertices.Add(x / maxCoord);
+                        vertices.Add(z / maxCoord);
+                        vertices.Add(y / maxCoord);
                         vertices.Add(rgb[wall.color, 0]);
                         vertices.Add(rgb[wall.color, 1]);
                         vertices.Add(rgb[wall.color, 2]);
