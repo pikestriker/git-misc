@@ -50,6 +50,11 @@ namespace Editor3D
             }
         }
 
+        public void findShader(string shaderType, string shaderName)
+        {
+
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -133,6 +138,17 @@ namespace Editor3D
             }
             GL.UseProgram(programHandle);
             return 0;
+        }
+
+        public int getUniformLoc(string uniformName)
+        {
+            int retVal = -1;
+            if (isReady)
+            {
+                // going to add code later to find a shader to use (this class is initially setup to load multiple shaders)
+                retVal = GL.GetUniformLocation(programHandle, uniformName);
+            }
+            return retVal;
         }
     }
 }

@@ -235,9 +235,9 @@ namespace Editor3D
                         float y = vert.y - centerPointY;
                         float z = vert.z - centerPointZ;
                         // swapped the y and z values because they are flipped in the C++ program that can navigate the world
-                        vertices.Add(x / maxCoord);
-                        vertices.Add(z / maxCoord);
-                        vertices.Add(y / maxCoord);
+                        vertices.Add(vert.x);
+                        vertices.Add(vert.z);
+                        vertices.Add(vert.y);
                         vertices.Add(rgb[wall.color, 0]);
                         vertices.Add(rgb[wall.color, 1]);
                         vertices.Add(rgb[wall.color, 2]);
