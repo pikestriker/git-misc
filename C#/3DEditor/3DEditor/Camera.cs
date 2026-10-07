@@ -12,16 +12,21 @@ namespace Editor3D
         Vector3 front;
         Vector3 up;
         float yaw, pitch;
+        Vector3 startPos, startFront, startUp;
 
         public Camera(Vector3 position, Vector3 front, Vector3 up)
         {
-            this.position = position;
-            this.front = Vector3.Normalize(position - front);
-            this.up = up;
+            //this.position = position;
+            this.startPos = position;
+            //this.front = ;
+            this.startFront = Vector3.Normalize(position - front);
+            //this.up = up;
+            this.startUp = up;
 
             //this is the way to calculate the yaw (https://stackoverflow.com/a/1847495) based on the front vector
-            yaw = MathHelper.RadiansToDegrees((float)Math.Atan2(this.front.Z, this.front.X));
-            pitch = 0.0f;
+            //yaw = MathHelper.RadiansToDegrees((float)Math.Atan2(this.front.Z, this.front.X));
+            //pitch = 0.0f;
+            resetToStart();
             //calculateFront();
         }
 
@@ -31,6 +36,16 @@ namespace Editor3D
             front.Y = (float)Math.Sin(MathHelper.DegreesToRadians(pitch));
             front.Z = (float)Math.Cos(MathHelper.DegreesToRadians(pitch)) * (float)Math.Sin(MathHelper.DegreesToRadians(yaw));
             front = Vector3.Normalize(front);
+        }
+
+        public void resetToStart()
+        {
+            this.position = this.startPos;
+            this.front = this.startFront;
+            this.up = this.startUp;
+
+            yaw = MathHelper.RadiansToDegrees((float)Math.Atan2(this.front.Z, this.front.X));
+            pitch = 0.0f;
         }
 
         public void addToPitch(float updatePitch)

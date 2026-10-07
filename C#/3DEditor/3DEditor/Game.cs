@@ -123,6 +123,12 @@ namespace Editor3D
                 Console.WriteLine("Something went wrong with the shaders");
         }
 
+        public void writeVariables()
+        {
+            Console.Clear();
+            Console.WriteLine("xPos = {0}, yPos = {1}, zPos = {2}", xPos, yPos, zPos);
+        }
+
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
@@ -136,14 +142,14 @@ namespace Editor3D
             {
                 camera.moveCamera(0.2f);
                 zPos -= 0.1f;
-                Console.WriteLine("xPos = {0}, zPos = {1}", xPos, zPos);
+                writeVariables();
             }
 
             if (KeyboardState.IsKeyDown(Keys.Down))
             {
                 camera.moveCamera(-0.2f);
                 zPos += 0.1f;
-                Console.WriteLine("xPos = {0}, zPos = {1}", xPos, zPos);
+                writeVariables();
             }
 
             if (KeyboardState.IsKeyDown(Keys.Left))
@@ -151,7 +157,7 @@ namespace Editor3D
                 camera.addToYaw(-0.09f);
                 yRot -= 0.1f; if (yRot < 0) yRot = 360.0f;
                 //xPos -= 0.1f;
-                Console.WriteLine("xPos = {0}, zPos = {1}", xPos, zPos);
+                writeVariables();
             }
 
             if (KeyboardState.IsKeyDown(Keys.Right))
@@ -159,7 +165,16 @@ namespace Editor3D
                 camera.addToYaw(0.09f);
                 yRot += 0.1f; if (yRot > 360.0f) yRot = 0.0f;
                 //xPos += 0.1f;
-                Console.WriteLine("xPos = {0}, zPos = {1}", xPos, zPos);
+                writeVariables();
+            }
+
+            if (KeyboardState.IsKeyDown(Keys.R))
+            {
+                zPos = 100.0f;
+                xPos = -82.0f;
+                yPos = -20.0f;
+                camera.resetToStart();
+                writeVariables();
             }
         }
 
