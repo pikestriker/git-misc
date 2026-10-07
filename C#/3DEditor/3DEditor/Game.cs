@@ -68,7 +68,11 @@ namespace Editor3D
         int mat4UniformLoc;
         float zPos = 100.0f, xPos = -82.0f, yPos = -20.0f;
         float yRot = 180.0f;
+        string shaderKey;
+        List<Element> elToDraw = new List<Element>();
         Camera camera = new Camera(new Vector3(82.0f, 20.0f, 100.0f), new Vector3(82.0f, 20.0f, 101.0f), new Vector3(0.0f, 1.0f, 0.0f));
+        //Camera camera = new Camera(new Vector3(0.0f, 0.0f, 100.0f), new Vector3(0.0f, 0.0f, 0.0f), new Vector3(0.0f, 1.0f, 0.0f));
+        Vertex sampleVertex;
 
         int width, height;
         Shader shaderList = new Shader();
@@ -77,12 +81,16 @@ namespace Editor3D
         { 
             this.width = width;
             this.height = height;
+            sampleVertex = new Vertex(width, height);
         }
 
         protected override void OnLoad()
         {
             base.OnLoad();
-            
+
+            // you can viewport different poritions of the screen to draw different things (thinking of a modeling program)
+            // 0, 0, width / 2, height /2 is the way to get it to draw in the bottom left corner of the screen
+            GL.Viewport(0, 0, width, height);
             GL.ClearColor(0.0f, 0.24f, 0.51f, 0.0f);
             GL.Enable(EnableCap.DepthTest);
 
@@ -98,6 +106,13 @@ namespace Editor3D
             //went on to the next tutorial and I need an element buffer with the primitives
             //float[] levelVertices = curLevel.getVertices();
             float[] levelVertices = curLevel.getVerticesWithColour();
+            for (int i = 0; i < levelVertices.Length; i = i + 6)
+            {
+                Vertex el = new Vertex(width, height);
+                el.setPos(new Vector3(levelVertices[i], levelVertices[i + 1], levelVertices[i + 2]));
+                elToDraw.Add(el);
+            }
+            sampleVertex.setPos(new Vector3(levelVertices[0], levelVertices[1], levelVertices[2]));
 
             vertexBuffer = GL.GenBuffer();
             int elementBuffer = GL.GenBuffer();
@@ -118,6 +133,7 @@ namespace Editor3D
 
             //int retVal = shaderList.loadShaders("BasicVertex.glsl", "BasicFragment.glsl");
             int retVal = shaderList.loadShaders("SimpleTransVertex.glsl", "SimpleFragment.glsl");
+            shaderKey = shaderList.key;
 
             if (retVal != 0)
                 Console.WriteLine("Something went wrong with the shaders");
@@ -169,6 +185,7 @@ namespace Editor3D
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.BindVertexArray(vertexArray);
+            shaderList.getShader(shaderKey);
             shaderList.useShader();
             int uniTrans = shaderList.getUniformLoc("trans");
             int uniView = shaderList.getUniformLoc("view");
@@ -177,6 +194,8 @@ namespace Editor3D
             //Matrix4 view =  Matrix4.CreateTranslation(xPos, yPos, zPos) * Matrix4.CreateRotationY(MathHelper.DegreesToRadians(yRot));
             Matrix4 view = camera.getLookAt();
             Matrix4 proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f), (float)width / (float)height, 0.1f, 200.0f);
+
+            //loop through the elemeents and draw
 
             //interesting thing happens, when you have the second parameter set to true (transpose the matrix) then you would need
             //to multiply the matrix after the vector in the shader, if you do it before the vector in the shader some interesting artifacts
@@ -191,14 +210,20 @@ namespace Editor3D
             //use the primitive type Triangles for a solid frame or LineLoop for a wireframe model
             //TriangleFan if I want to draw something else I guess...
             //GL.DrawArrays(PrimitiveType.TriangleFan, 0, 64);
-            GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+            //GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+            //sampleVertex.setView(view);
+            //sampleVertex.draw();
+
+            foreach (var el in elToDraw)
+            {
+                el.setView(view);
+                el.draw();
+            }
 
             //Code goes here.
             // Apparently I will need to write some vertex and fragment shaders to even draw anything on the screen
             // I have the vertex arrays loaded in the game level (curLevel) so I would just need to convert those to vertex
             // buffers and draw them to the screen.  I would just like to get something drawn to the screen first though
-
-
             SwapBuffers();
         }
 
@@ -206,6 +231,9 @@ namespace Editor3D
         {
             base.OnFramebufferResize(e);
 
+            width = e.Width;
+            height = e.Height;
+            sampleVertex.setWidthAndHeight(width, height);
             GL.Viewport(0, 0, e.Width, e.Height);
         }
     }
