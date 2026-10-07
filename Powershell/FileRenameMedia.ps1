@@ -1,4 +1,6 @@
-﻿function Rename-MediaFiles ($feederDir, $fieldsToUse)
+﻿. "${PSScriptRoot}\GetFileMetaData.ps1"
+
+function Rename-MediaFiles ($feederDir, $fieldsToUse)
 {
     if ($feederDir -eq $null -or $fieldsToUse -eq $null)
     {
