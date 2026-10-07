@@ -1,6 +1,10 @@
 ﻿// See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
 
+//This is a program that was created based on assignment that I was looking for to test coding ability of
+//some of the candidates.  I was able to do this challenge myself but I did deem it too challenging to give
+//to a potential hire
+
 string s = "PAYPALISHIRING";
 int numLines = 4;
 int addToLine = 0;
