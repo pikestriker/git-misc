@@ -206,6 +206,7 @@ namespace Editor3D
                     foreach (var vert in wall.verts)
                     {
                         // lets normalize the coordinates before we do this
+                        // not sure why I normalize these coordinates???
                         float x = vert.x - centerPointX;
                         float y = vert.y - centerPointY;
                         float z = vert.z - centerPointZ;

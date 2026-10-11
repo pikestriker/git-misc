@@ -4,6 +4,10 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
+//my next step is to add the lines, it looks like the lines class is created correctly but then I have to
+//pull out the list of the lines from the current level
+//I also want to put something in so that I can switch back and forth between wireframe mode and model
+
 namespace Editor3D
 {
     public class Game : GameWindow
@@ -106,11 +110,27 @@ namespace Editor3D
             //went on to the next tutorial and I need an element buffer with the primitives
             //float[] levelVertices = curLevel.getVertices();
             float[] levelVertices = curLevel.getVerticesWithColour();
-            for (int i = 0; i < levelVertices.Length; i = i + 6)
+            //for (int i = 0; i < levelVertices.Length; i = i + 6)
+            for (int i = 0; i < 4 * 6; i = i + 6)
             {
                 Vertex el = new Vertex(width, height);
                 el.setPos(new Vector3(levelVertices[i], levelVertices[i + 1], levelVertices[i + 2]));
                 elToDraw.Add(el);
+            }
+
+            //just trying to add a line, got it drawing but it is behaving strangely
+            //the line seems to transpose to different areas as I move the camera around
+            //it is still in the same vicinity but it moves around where as the little vertex
+            //cubes seem to stay in the same position
+            //Also, not sure if it is in the proper place, it is something along the x axis
+            //(I confirmed via the walls file) so that appears to be correct
+            for (int i = 0; i < 3; i++)
+            {
+                Vector3 startPos = new Vector3(levelVertices[i*6], levelVertices[i*6+1], levelVertices[i*6+2]);
+                Vector3 stopPos = new Vector3(levelVertices[(i+1) % 3 * 6], levelVertices[(i+1) % 3 * 6 + 1], levelVertices[(i+1) % 3 * 6 + 2]);
+                Line sampleLine = new Line(width, height, startPos, stopPos);
+                //sampleLine.setPos(new Vector3(levelVertices[0], levelVertices[1], levelVertices[2]));
+                elToDraw.Add(sampleLine);
             }
             sampleVertex.setPos(new Vector3(levelVertices[0], levelVertices[1], levelVertices[2]));
 
